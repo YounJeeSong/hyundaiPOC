@@ -133,6 +133,12 @@
             gap: 16px;
         }
 
+        .top-bar-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
         .page-title {
             font-size: 20px;
             font-weight: 500;
@@ -1057,6 +1063,10 @@
                     <button class="view-tab" onclick="switchView('set')">세트 뷰</button>
                     <button class="view-tab" onclick="switchView('param')">파라미터 뷰</button>
                 </div>
+                <div class="top-bar-actions">
+                    <button class="action-btn outline" onclick="location.href='index.html'">← 목록으로</button>
+                    <button class="action-btn primary" onclick="goToEditMode()">수정</button>
+                </div>
             </header>
 
             <!-- Content Area -->
@@ -1128,11 +1138,6 @@
                                 <span class="info-stat-label">연결선</span>
                                 <span class="info-stat-value" id="connectionCount">4개</span>
                             </div>
-                        </div>
-
-                        <div class="version-actions">
-                            <button class="action-btn outline" onclick="location.href='index.html'">← 목록으로</button>
-                            <button class="action-btn primary" onclick="goToEditMode()">수정</button>
                         </div>
                     </div>
 
