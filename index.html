@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>데이터 조회 - 현대자동차 R&D Parameter DB</title>
+    <title>프로젝트 조회 - 현대자동차 R&D Parameter DB</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --hyundai-blue: #002c5f;
+            --white: #ffffff;
+            --hyundai-sand: #e4dcd3;
+            --hyundai-light-sand: #f6f3f2;
+            --grey-dark: #676767;
+            --grey-light: #cccccc;
+            --progressive-blue: #00aad2;
+            --grey-66: #666666;
+            --grey-33: #333333;
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans KR', sans-serif; background: #f6f3f2; }
         .app-container { display: flex; height: 100vh; overflow: hidden; }
@@ -28,11 +41,43 @@
         .nav-item.active { background: #00aad2; }
         
         .main-content { flex: 1; display: flex; flex-direction: column; }
-        .top-bar { height: 70px; background: #fff; border-bottom: 1px solid #e4dcd3; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+        .top-bar { height: 70px; background: #fff; border-bottom: 1px solid #e4dcd3; display: flex; align-items: center; gap: 16px; padding: 0 32px; }
         .page-title { font-size: 24px; font-weight: 500; color: #002c5f; }
+        
+        /* View Tabs */
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--hyundai-light-sand);
+            padding: 4px;
+            border-radius: 8px;
+            margin-left: 24px;
+        }
+        .view-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--grey-66);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.15s ease;
+        }
+        .view-tab:hover { background: rgba(0, 44, 95, 0.05); }
+        .view-tab.active { background: var(--hyundai-blue); color: var(--white); }
+        
+        .top-bar-right { margin-left: auto; }
         .btn { padding: 12px 24px; border: 1px solid #e4dcd3; border-radius: 4px; font-size: 14px; cursor: pointer; }
         .btn-primary { background: #002c5f; color: #fff; border: none; }
+        
         .content-area { flex: 1; overflow-y: auto; padding: 32px; }
+        
+        /* 뷰 컨테이너 */
+        .view-container { display: none; }
+        .view-container.active { display: block; }
+        
+        /* ========== 버전 뷰 (프로젝트 카드 그리드) ========== */
         .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
         
         .project-card { background: #fff; border: 1px solid #e4dcd3; border-radius: 8px; overflow: hidden; transition: 0.2s; position: relative; }
@@ -47,13 +92,10 @@
         .project-card-footer { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #e4dcd3; }
         .project-card-date { font-size: 12px; color: #676767; }
         
-        /* 호버 오버레이 - preview 영역에 배치 */
+        /* 호버 오버레이 */
         .project-card-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 44, 95, 0.85);
             display: flex;
             flex-direction: column;
@@ -64,9 +106,7 @@
             transition: opacity 0.2s;
             z-index: 10;
         }
-        .project-card:hover .project-card-overlay {
-            opacity: 1;
-        }
+        .project-card:hover .project-card-overlay { opacity: 1; }
         .overlay-btn {
             padding: 10px 32px;
             border-radius: 4px;
@@ -76,17 +116,129 @@
             min-width: 120px;
             transition: 0.2s;
         }
-        .overlay-btn-open {
-            background: #00aad2;
-            color: #fff;
-        }
+        .overlay-btn-open { background: #00aad2; color: #fff; }
         .overlay-btn-open:hover { background: #008fb3; }
-        .overlay-btn-delete {
-            background: transparent;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
+        .overlay-btn-delete { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); }
         .overlay-btn-delete:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+        
+        /* ========== 세트 뷰 ========== */
+        .set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .set-card {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .set-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+        
+        .set-card-header {
+            padding: 16px;
+            background: var(--hyundai-light-sand);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+        .set-card-title { font-size: 15px; font-weight: 600; color: var(--grey-33); margin-bottom: 4px; }
+        .set-card-subtitle { font-size: 13px; color: var(--grey-66); }
+        
+        .set-card-body { padding: 16px; }
+        .set-card-param {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid var(--hyundai-light-sand);
+        }
+        .set-card-param:last-child { border-bottom: none; }
+        .set-card-param-name { color: var(--grey-66); }
+        .set-card-param-value { font-weight: 600; font-family: 'Courier New', monospace; }
+        
+        .set-card-footer {
+            padding: 12px 16px;
+            background: var(--hyundai-light-sand);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--grey-66);
+        }
+        .set-card-badge {
+            padding: 4px 10px;
+            background: var(--hyundai-blue);
+            color: var(--white);
+            border-radius: 12px;
+            font-size: 11px;
+        }
+        
+        /* ========== 파라미터 뷰 ========== */
+        .param-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .param-stats {
+            display: flex;
+            gap: 24px;
+        }
+        .param-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--grey-66);
+        }
+        .param-stat-value {
+            font-weight: 600;
+            color: var(--hyundai-blue);
+            font-size: 18px;
+        }
+        
+        .param-table-container {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .param-table th {
+            background: var(--hyundai-blue);
+            color: var(--white);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 500;
+        }
+        .param-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--hyundai-light-sand);
+        }
+        .param-table tr:hover { background: var(--hyundai-light-sand); }
+        .param-table tr:last-child td { border-bottom: none; }
+        
+        .param-name-cell { font-weight: 500; color: var(--grey-33); }
+        .param-value-cell { font-family: 'Courier New', monospace; font-weight: 600; color: var(--hyundai-blue); }
+        .param-unit { color: var(--grey-66); }
+        .param-set-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--hyundai-light-sand);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--grey-66);
+        }
+        .param-project-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -126,11 +278,56 @@
         </nav>
         <div class="main-content">
             <div class="top-bar">
-                <h1 class="page-title">프로젝트 조회</h1>
-                <button class="btn btn-primary" onclick="window.location.href='create-step1.html'">+ 새 프로젝트</button>
+                <h1 class="page-title">데이터조회</h1>
+                <div class="view-tabs">
+                    <button class="view-tab active" onclick="switchView('version')">버전 뷰</button>
+                    <button class="view-tab" onclick="switchView('set')">세트 뷰</button>
+                    <button class="view-tab" onclick="switchView('param')">파라미터 뷰</button>
+                </div>
+                <div class="top-bar-right">
+                    <button class="btn btn-primary" onclick="window.location.href='create-step1.html'">+ 새 프로젝트</button>
+                </div>
             </div>
             <div class="content-area">
-                <div class="project-grid" id="projectGrid"></div>
+                <!-- 버전 뷰 (프로젝트 카드) -->
+                <div class="view-container active" id="versionView">
+                    <div class="project-grid" id="projectGrid"></div>
+                </div>
+                
+                <!-- 세트 뷰 -->
+                <div class="view-container" id="setView">
+                    <div class="set-grid" id="setGrid"></div>
+                </div>
+                
+                <!-- 파라미터 뷰 -->
+                <div class="view-container" id="paramView">
+                    <div class="param-view-header">
+                        <div class="param-stats">
+                            <div class="param-stat">
+                                <span>전체 파라미터</span>
+                                <span class="param-stat-value" id="totalParamCount">0</span>
+                            </div>
+                            <div class="param-stat">
+                                <span>전체 세트</span>
+                                <span class="param-stat-value" id="totalSetCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="param-table-container">
+                        <table class="param-table">
+                            <thead>
+                                <tr>
+                                    <th>파라미터명</th>
+                                    <th>값</th>
+                                    <th>단위</th>
+                                    <th>세트</th>
+                                    <th>프로젝트</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paramTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -145,7 +342,18 @@
                 category: '서스펜션',
                 description: '대형 SUV 승차감 최적화를 위한 전륜 서스펜션 파라미터',
                 cardCount: 8,
-                createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'FR_SPRING', subtitle: '전륜 스프링', params: [
+                        { name: 'Spring Rate', value: '45.2', unit: 'N/mm' },
+                        { name: 'Free Length', value: '380', unit: 'mm' },
+                        { name: 'Wire Dia', value: '14.5', unit: 'mm' }
+                    ]},
+                    { name: 'FR_DAMPER', subtitle: '전륜 댐퍼', params: [
+                        { name: 'Comp Force', value: '1250', unit: 'N' },
+                        { name: 'Reb Force', value: '2100', unit: 'N' }
+                    ]}
+                ]
             },
             {
                 id: 1002,
@@ -153,7 +361,13 @@
                 category: '배터리',
                 description: '고속충전 대응 열관리 시스템 설계 파라미터',
                 cardCount: 12,
-                createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'COOLING_PLATE', subtitle: '냉각 플레이트', params: [
+                        { name: 'Flow Rate', value: '12.5', unit: 'L/min' },
+                        { name: 'Thermal Cond', value: '205', unit: 'W/mK' }
+                    ]}
+                ]
             },
             {
                 id: 1003,
@@ -161,7 +375,13 @@
                 category: '조향',
                 description: 'R-MDPS 조향감 튜닝 및 응답성 파라미터',
                 cardCount: 6,
-                createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'STEERING_RATIO', subtitle: '조향비', params: [
+                        { name: 'Ratio', value: '14.5', unit: ':1' },
+                        { name: 'Assist Torque', value: '6.2', unit: 'Nm' }
+                    ]}
+                ]
             },
             {
                 id: 1004,
@@ -169,7 +389,13 @@
                 category: '샤시',
                 description: '고성능 차량 바디 강성 및 NVH 특성 분석',
                 cardCount: 15,
-                createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'BODY_STIFFNESS', subtitle: '바디 강성', params: [
+                        { name: 'Torsional', value: '42500', unit: 'Nm/deg' },
+                        { name: 'Bending', value: '18200', unit: 'N/mm' }
+                    ]}
+                ]
             },
             {
                 id: 1005,
@@ -177,7 +403,13 @@
                 category: '제동',
                 description: '회생제동 연계 유압제동 파라미터 설정',
                 cardCount: 9,
-                createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'REGEN_BRAKE', subtitle: '회생제동', params: [
+                        { name: 'Max Regen', value: '80', unit: 'kW' },
+                        { name: 'Blend Point', value: '0.25', unit: 'g' }
+                    ]}
+                ]
             },
             {
                 id: 1006,
@@ -185,30 +417,42 @@
                 category: '서스펜션',
                 description: '5-Link 후륜 서스펜션 킥백 저감 설계',
                 cardCount: 7,
-                createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+                sets: [
+                    { name: 'RR_GEOMETRY', subtitle: '후륜 지오메트리', params: [
+                        { name: 'Camber', value: '-1.2', unit: 'deg' },
+                        { name: 'Toe', value: '0.15', unit: 'deg' },
+                        { name: 'Caster', value: '4.5', unit: 'deg' }
+                    ]}
+                ]
             }
         ];
+
+        let allProjects = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             initSampleData();
         });
 
         function initSampleData() {
-            const DATA_VERSION = 'v3';
+            const DATA_VERSION = 'v4';
             let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
             
             if (localStorage.getItem('dataVersion') !== DATA_VERSION || projectList.length === 0) {
                 localStorage.clear();
                 localStorage.setItem('dataVersion', DATA_VERSION);
-                projectList = dummyProjects.map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    category: p.category,
-                    createdAt: p.createdAt,
-                    cardCount: p.cardCount
-                }));
                 
-                dummyProjects.forEach(p => {
+                projectList = dummyProjects.map(function(p) {
+                    return {
+                        id: p.id,
+                        name: p.name,
+                        category: p.category,
+                        createdAt: p.createdAt,
+                        cardCount: p.cardCount
+                    };
+                });
+                
+                dummyProjects.forEach(function(p) {
                     const projectData = {
                         id: p.id,
                         meta: {
@@ -219,6 +463,7 @@
                             step: 2
                         },
                         cards: [],
+                        sets: p.sets,
                         layout: { modelImageSrc: ENGINE_IMAGE }
                     };
                     localStorage.setItem('project_' + p.id, JSON.stringify(projectData));
@@ -233,22 +478,46 @@
         function loadProjects() {
             const projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
             
-            const projects = projectList.map(proj => {
+            allProjects = projectList.map(function(proj) {
                 const projectData = JSON.parse(localStorage.getItem('project_' + proj.id) || '{}');
                 return {
                     ...proj,
                     description: projectData.meta ? projectData.meta.description : '',
-                    modelImageSrc: projectData.layout ? projectData.layout.modelImageSrc : null
+                    modelImageSrc: projectData.layout ? projectData.layout.modelImageSrc : null,
+                    sets: projectData.sets || []
                 };
             });
             
-            renderProjects(projects);
+            renderVersionView();
+            renderSetView();
+            renderParamView();
         }
 
-        function renderProjects(projects) {
+        // ========== 뷰 전환 ==========
+        function switchView(viewType) {
+            document.querySelectorAll('.view-tab').forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.view-container').forEach(function(view) {
+                view.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            
+            if (viewType === 'version') {
+                document.getElementById('versionView').classList.add('active');
+            } else if (viewType === 'set') {
+                document.getElementById('setView').classList.add('active');
+            } else if (viewType === 'param') {
+                document.getElementById('paramView').classList.add('active');
+            }
+        }
+
+        // ========== 버전 뷰 렌더링 ==========
+        function renderVersionView() {
             const grid = document.getElementById('projectGrid');
             
-            grid.innerHTML = projects.map(project => {
+            grid.innerHTML = allProjects.map(function(project) {
                 return '<div class="project-card">' +
                     '<div class="project-card-preview">' +
                     (project.modelImageSrc ? '<img src="' + project.modelImageSrc + '" alt="' + project.name + '">' : '') +
@@ -270,6 +539,79 @@
             }).join('');
         }
 
+        // ========== 세트 뷰 렌더링 ==========
+        function renderSetView() {
+            const grid = document.getElementById('setGrid');
+            let html = '';
+            
+            allProjects.forEach(function(project) {
+                if (project.sets && project.sets.length > 0) {
+                    project.sets.forEach(function(set) {
+                        html += '<div class="set-card" onclick="openProject(' + project.id + ')">' +
+                            '<div class="set-card-header">' +
+                                '<div class="set-card-title">' + set.name + '</div>' +
+                                '<div class="set-card-subtitle">' + set.subtitle + '</div>' +
+                            '</div>' +
+                            '<div class="set-card-body">';
+                        
+                        set.params.forEach(function(param) {
+                            html += '<div class="set-card-param">' +
+                                '<span class="set-card-param-name">' + param.name + '</span>' +
+                                '<span class="set-card-param-value">' + param.value + ' ' + param.unit + '</span>' +
+                            '</div>';
+                        });
+                        
+                        html += '</div>' +
+                            '<div class="set-card-footer">' +
+                                '<span class="set-card-badge">' + project.category + '</span>' +
+                                '<span>' + project.name + '</span>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                }
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        // ========== 파라미터 뷰 렌더링 ==========
+        function renderParamView() {
+            const tbody = document.getElementById('paramTableBody');
+            let allParams = [];
+            let totalSets = 0;
+            
+            allProjects.forEach(function(project) {
+                if (project.sets && project.sets.length > 0) {
+                    totalSets += project.sets.length;
+                    project.sets.forEach(function(set) {
+                        set.params.forEach(function(param) {
+                            allParams.push({
+                                name: param.name,
+                                value: param.value,
+                                unit: param.unit,
+                                setName: set.name,
+                                projectName: project.name,
+                                projectId: project.id
+                            });
+                        });
+                    });
+                }
+            });
+            
+            tbody.innerHTML = allParams.map(function(p) {
+                return '<tr onclick="openProject(' + p.projectId + ')" style="cursor:pointer;">' +
+                    '<td class="param-name-cell">' + p.name + '</td>' +
+                    '<td class="param-value-cell">' + p.value + '</td>' +
+                    '<td class="param-unit">' + p.unit + '</td>' +
+                    '<td><span class="param-set-badge">' + p.setName + '</span></td>' +
+                    '<td><span class="param-project-badge">' + p.projectName + '</span></td>' +
+                '</tr>';
+            }).join('');
+            
+            document.getElementById('totalParamCount').textContent = allParams.length;
+            document.getElementById('totalSetCount').textContent = totalSets;
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             const now = new Date();
@@ -281,7 +623,7 @@
         }
 
         function openProject(projectId) {
-            window.location.href = 'view-detail.html';
+            window.location.href = 'view-detail.html?id=' + projectId;
         }
 
         function deleteProject(event, projectId) {
@@ -289,15 +631,12 @@
             event.stopPropagation();
             
             if (confirm('이 프로젝트를 삭제하시겠습니까?')) {
-                // localStorage에서 프로젝트 데이터 삭제
                 localStorage.removeItem('project_' + projectId);
                 
-                // projectList에서 해당 프로젝트 제거
                 let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
                 projectList = projectList.filter(function(p) { return p.id !== projectId; });
                 localStorage.setItem('projectList', JSON.stringify(projectList));
                 
-                // 화면 새로고침
                 loadProjects();
             }
         }

@@ -1051,17 +1051,12 @@
         <main class="main-content">
             <!-- Top Bar -->
             <header class="top-bar">
-                <h1 class="page-title">데이터조회</h1>
+                <h1 class="page-title">데이터 상세</h1>
                 <div class="search-box">
                     <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input type="text" class="search-input" placeholder="파라미터, 세트, 부품번호 검색..." id="searchInput" oninput="handleSearch(this.value)">
-                </div>
-                <div class="view-tabs">
-                    <button class="view-tab active" onclick="switchView('version')">버전 뷰</button>
-                    <button class="view-tab" onclick="switchView('set')">세트 뷰</button>
-                    <button class="view-tab" onclick="switchView('param')">파라미터 뷰</button>
                 </div>
                 <div class="top-bar-actions">
                     <button class="action-btn outline" onclick="location.href='index.html'">목록</button>
@@ -1076,9 +1071,9 @@
                     <!-- Left Panel -->
                     <div class="version-left-panel">
                         <div class="version-breadcrumb">
-                            <a href="#">프로젝트 조회</a> › NE2_ICAR
+                            <a href="#">데이터 조회</a> › 2025 GV90 전륜 서스펜션 시스템
                         </div>
-                        <h2 class="version-title">NE2_ICAR</h2>
+                        <h2 class="version-title">2025 GV90 전륜 서스펜션 시스템</h2>
                         <div class="version-badges">
                             <span class="version-badge primary">차체</span>
                             <span class="version-badge">
@@ -1097,7 +1092,7 @@
                         </div>
 
                         <div class="info-section">
-                            <div class="info-section-title">프로젝트 정보</div>
+                            <div class="info-section-title">데이터 정보</div>
                             <div class="info-row">
                                 <div class="info-label">설명</div>
                                 <div class="info-value">ICAR NE2 서스펜션 파라미터</div>
@@ -1180,61 +1175,6 @@
                     </div>
                 </div>
 
-                <!-- SET VIEW -->
-                <div class="set-view" id="setView">
-                    <div class="set-filter-bar">
-                        <button class="filter-chip active" onclick="filterSets('all')">전체</button>
-                        <button class="filter-chip" onclick="filterSets('static')">Static</button>
-                        <button class="filter-chip" onclick="filterSets('absorber')">S/ABS</button>
-                        <button class="filter-chip" onclick="filterSets('insulator')">INSULATOR</button>
-                        <button class="filter-chip" onclick="filterSets('hardpoint')">HARD POINT</button>
-                    </div>
-                    <div class="set-grid" id="setGrid">
-                        <!-- Dynamic content -->
-                    </div>
-                </div>
-
-                <!-- PARAMETER VIEW -->
-                <div class="param-view" id="paramView">
-                    <div class="param-stats">
-                        <div class="stat-card">
-                            <div class="stat-value" id="totalParamCount">0</div>
-                            <div class="stat-label">총 파라미터</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="totalSetCount">0</div>
-                            <div class="stat-label">총 세트</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">1</div>
-                            <div class="stat-label">버전</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">2025.09.22</div>
-                            <div class="stat-label">최종 수정</div>
-                        </div>
-                    </div>
-                    <div class="param-table-container">
-                        <div class="param-table-header">
-                            <span class="param-table-title">파라미터 목록</span>
-                            <span id="filteredCount"></span>
-                        </div>
-                        <table class="param-table">
-                            <thead>
-                                <tr>
-                                    <th>파라미터명</th>
-                                    <th>값</th>
-                                    <th>단위</th>
-                                    <th>소속 세트</th>
-                                    <th>분류</th>
-                                </tr>
-                            </thead>
-                            <tbody id="paramTableBody">
-                                <!-- Dynamic content -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
