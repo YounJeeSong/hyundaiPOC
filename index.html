@@ -135,7 +135,7 @@
         </div>
     </div>
     <script>
-        const ENGINE_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjZmM2YyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NzY3NjciIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0Ij5Nb2RlbCBJbWFnZTwvdGV4dD48L3N2Zz4=';
+        const ENGINE_IMAGE = 'Suspension.png';
 
         // 더미 프로젝트 데이터
         const dummyProjects = [
@@ -194,7 +194,7 @@
         });
 
         function initSampleData() {
-            const DATA_VERSION = 'v2';
+            const DATA_VERSION = 'v3';
             let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
             
             if (localStorage.getItem('dataVersion') !== DATA_VERSION || projectList.length === 0) {
