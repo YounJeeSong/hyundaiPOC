@@ -55,8 +55,8 @@
             overflow: hidden;
         }
 
-        /* Sidebar */
-        .sidebar {
+        /* Global Navigation - 시뮬레이션 스타일 통일 */
+        .global-nav {
             width: 240px;
             background: var(--hyundai-blue);
             color: var(--white);
@@ -71,12 +71,12 @@
         }
 
         .logo-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 500;
         }
 
         .logo-subtitle {
-            font-size: 12px;
+            font-size: 14px;
             opacity: 0.7;
             margin-top: 4px;
         }
@@ -91,12 +91,12 @@
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
-            color: rgba(255, 255, 255, 0.8);
+            color: #fff;
             font-size: 14px;
             border-radius: 4px;
             cursor: pointer;
-            transition: var(--transition-fast);
-            margin-bottom: 8px;
+            transition: 0.3s ease;
+            margin-bottom: 4px;
         }
 
         .nav-item:hover {
@@ -105,7 +105,6 @@
 
         .nav-item.active {
             background: var(--progressive-blue);
-            color: var(--white);
         }
 
         /* Main Content */
@@ -1000,7 +999,7 @@
 <body>
     <div class="app-container">
         <!-- Sidebar -->
-        <nav class="sidebar">
+        <nav class="global-nav">
             <div class="logo-area">
                 <div class="logo-title">R&D Parameter DB</div>
                 <div class="logo-subtitle">현대자동차</div>

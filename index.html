@@ -9,15 +9,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans KR', sans-serif; background: #f6f3f2; }
         .app-container { display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 240px; background: #002c5f; color: #fff; display: flex; flex-direction: column; }
+        
+        /* Global Navigation - 시뮬레이션 스타일 통일 */
+        .global-nav { width: 240px; background: #002c5f; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo-area { padding: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .logo-title { font-size: 18px; font-weight: 500; }
-        .logo-subtitle { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        .logo-title { font-size: 20px; font-weight: 500; }
+        .logo-subtitle { font-size: 14px; opacity: 0.7; margin-top: 4px; }
         .nav-menu { flex: 1; padding: 16px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 4px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 4px; cursor: pointer; transition: 0.3s ease; margin-bottom: 4px; font-size: 14px; color: #fff; }
         .nav-item:hover { background: rgba(255, 255, 255, 0.1); }
         .nav-item.active { background: #00aad2; }
-        .nav-icon { width: 20px; height: 20px; }
+        
         .main-content { flex: 1; display: flex; flex-direction: column; }
         .top-bar { height: 70px; background: #fff; border-bottom: 1px solid #e4dcd3; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
         .page-title { font-size: 24px; font-weight: 500; color: #002c5f; }
@@ -40,7 +42,7 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
+        <nav class="global-nav">
             <div class="logo-area">
                 <div class="logo-title">R&D Parameter DB</div>
                 <div class="logo-subtitle">현대자동차</div>
