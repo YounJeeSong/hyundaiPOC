@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모델 & 카드 연결 - 현대자동차 R&D Parameter DB</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            /* Colors */
+            --hyundai-blue: #002c5f;
+            --white: #ffffff;
+            --black: #000000;
+            --hyundai-sand: #e4dcd3;
+            --hyundai-light-sand: #f6f3f2;
+            --grey-dark: #676767;
+            --grey-light: #cccccc;
+            --progressive-blue: #00aad2;
+            --active-red: #e63312;
+            --success-green: #28a745;
+            --anchor-red: #ff0000;
+            
+            /* Typography */
+            --font-head: 'Noto Sans KR', sans-serif;
+            --font-text: 'Noto Sans KR', sans-serif;
+            --weight-medium: 500;
+            --font-size-h4: 20px;
+            --font-size-body: 16px;
+            --font-size-small: 14px;
+            --font-size-micro: 12px;
+            
+            /* Spacing */
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            
+            /* Grid */
+            --grid-size: 40px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            overflow: hidden;
+        }
+
+        /* Layout Structure (Step1과 동일) */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Global Navigation */
+        .global-nav {
+            width: 240px;
+            background: var(--hyundai-blue);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            padding: var(--space-24);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-title {
+            font-size: var(--font-size-h4);
+            font-weight: var(--weight-medium);
+        }
+
+        .logo-subtitle {
+            font-size: var(--font-size-small);
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: var(--space-16);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+            padding: var(--space-12) var(--space-16);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: var(--progressive-blue);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Card List Sidebar */
+        .card-sidebar {
+            width: 300px;
+            background: var(--white);
+            border-right: 1px solid var(--hyundai-sand);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: var(--space-16);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .sidebar-title {
+            font-size: var(--font-size-body);
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: var(--space-12);
+        }
+
+        .sidebar-buttons {
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .btn-import-all {
+            flex: 1;
+            padding: var(--space-12);
+            background: var(--progressive-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+        }
+
+        .btn-import-all:hover {
+            background: #0099bb;
+        }
+
+        .btn-clear-all {
+            flex: 1;
+            padding: var(--space-12);
+            background: var(--white);
+            color: var(--hyundai-blue);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+        }
+
+        .btn-clear-all:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .card-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-16);
+        }
+
+        .card-list-item {
+            padding: var(--space-12);
+            background: var(--hyundai-light-sand);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            margin-bottom: var(--space-8);
+            cursor: move;
+            transition: 0.2s;
+        }
+
+        .card-list-item:hover {
+            background: var(--hyundai-sand);
+        }
+
+        .card-list-item-name {
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: 4px;
+        }
+
+        .card-list-item-info {
+            font-size: var(--font-size-micro);
+            color: var(--grey-dark);
+        }
+
+        /* Work Area */
+        .work-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 70px;
+            background: var(--white);
+            border-bottom: 1px solid var(--hyundai-sand);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-24);
+        }
+
+        .page-title-section {
+            display: flex;
+            align-items: center;
+            gap: var(--space-16);
+        }
+
+        .page-title {
+            font-size: var(--font-size-h4);
+            font-weight: var(--weight-medium);
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--progressive-blue);
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .btn {
+            padding: var(--space-12) var(--space-24);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            font-size: var(--font-size-small);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--hyundai-blue);
+            color: var(--white);
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--progressive-blue);
+            color: var(--white);
+            border: none;
+        }
+
+        .btn-outline {
+            background: var(--white);
+            color: var(--hyundai-blue);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle, var(--grey-light) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+        }
+
+        .canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            transition: transform 0.2s ease;
+        }
+
+        /* Canvas Controls */
+        .canvas-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 200;
+        }
+
+        .canvas-control-group {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 8px;
+        }
+
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .control-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-btn:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .control-btn.active {
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-color: var(--progressive-blue);
+        }
+
+        .zoom-level {
+            text-align: center;
+            font-size: var(--font-size-micro);
+            color: var(--grey-dark);
+            margin: 4px 0;
+        }
+
+        /* Upload Prompt */
+        .upload-prompt {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--grey-dark);
+        }
+
+        .upload-prompt button {
+            margin-top: var(--space-16);
+            padding: var(--space-12) var(--space-24);
+            background: var(--progressive-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Model Image */
+        .model-image {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 600px;
+            max-height: 600px;
+            cursor: crosshair;
+            border: 2px dashed var(--progressive-blue);
+        }
+
+        .model-image.anchor-mode {
+            cursor: crosshair;
+        }
+
+        /* Anchor Point */
+        .anchor-point {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--anchor-red);
+            border: 2px solid var(--white);
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .anchor-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--anchor-red);
+            color: var(--white);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: var(--font-size-micro);
+            font-weight: var(--weight-medium);
+            white-space: nowrap;
+        }
+
+        /* Card on Canvas */
+        .canvas-card {
+            position: absolute;
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 320px;
+            z-index: 10;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.2s ease,
+                        border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .canvas-card:hover {
+            border-color: var(--progressive-blue);
+        }
+
+        .canvas-card.selected {
+            border: 2px solid var(--progressive-blue);
+            box-shadow: 0 4px 16px rgba(0, 170, 210, 0.3);
+        }
+
+        .canvas-card.connected {
+            border: 2px solid var(--success-green);
+        }
+
+        .canvas-card.dragging {
+            opacity: 0.95;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: none;
+        }
+
+        .canvas-card-actions {
+            position: absolute;
+            top: var(--space-8);
+            right: var(--space-8);
+            display: flex;
+            gap: 4px;
+            z-index: 20;
+        }
+
+        .card-action-btn {
+            width: 28px;
+            height: 28px;
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .card-action-btn:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .card-action-btn.delete:hover {
+            background: #ffebee;
+            border-color: var(--active-red);
+            color: var(--active-red);
+        }
+
+        .canvas-card-header {
+            background: var(--hyundai-sand);
+            padding: var(--space-12);
+            border-bottom: 1px solid var(--grey-light);
+            cursor: move;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-8);
+        }
+
+        .header-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .header-label {
+            width: 80px;
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+            color: var(--black);
+        }
+
+        .header-input, .header-select {
+            flex: 1;
+            padding: 6px 12px;
+            border: 1px solid var(--grey-light);
+            border-radius: 4px;
+            font-size: var(--font-size-small);
+            background: var(--white);
+        }
+
+        .header-select {
+            cursor: pointer;
+        }
+
+        .canvas-card-body {
+            padding: var(--space-12);
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .param-table td {
+            padding: 8px;
+            font-size: var(--font-size-small);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .param-table td:first-child {
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            width: 50%;
+        }
+
+        .param-table td:last-child {
+            text-align: right;
+            color: var(--grey-dark);
+        }
+
+        .param-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .param-value-input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            font-size: var(--font-size-small);
+            text-align: right;
+            background: var(--white);
+        }
+
+        .param-value-input:focus {
+            outline: none;
+            border-color: var(--progressive-blue);
+        }
+
+        /* Connection Lines */
+        .connection-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .connection-line line {
+            stroke: var(--anchor-red);
+            stroke-width: 2;
+            transition: x1 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        y1 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        x2 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        y2 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #modelImageInput {
+            display: none;
+        }
+
+        /* Save Modal */
+        .save-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .save-modal {
+            background: var(--white);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .save-modal-header {
+            padding: var(--space-24);
+            border-bottom: 1px solid var(--hyundai-sand);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .save-modal-title {
+            font-size: var(--font-size-h4);
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+        }
+
+        .save-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--grey-dark);
+        }
+
+        .save-modal-body {
+            padding: var(--space-24);
+        }
+
+        .save-form-group {
+            margin-bottom: var(--space-24);
+        }
+
+        .save-form-label {
+            display: block;
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: var(--space-8);
+        }
+
+        .save-form-label.required::after {
+            content: ' *';
+            color: var(--active-red);
+        }
+
+        .save-form-input, .save-form-select, .save-form-textarea {
+            width: 100%;
+            padding: var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: 4px;
+            font-size: var(--font-size-body);
+            font-family: var(--font-text);
+        }
+
+        .save-form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .save-modal-footer {
+            padding: var(--space-24);
+            border-top: 1px solid var(--hyundai-sand);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-8);
+        }
+    
+        /* 통일된 네비게이션 스타일 */
+        .nav-button-area {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .nav-btn-primary {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #00aad2;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .nav-btn-primary:hover {
+            background: #0099bb;
+        }
+
+        .nav-btn-primary.active {
+            background: #00aad2;
+            box-shadow: 0 0 0 3px rgba(0, 170, 210, 0.2);
+        }
+
+        .global-nav {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Navigation -->
+        <div class="global-nav">
+            <div class="logo-area">
+                <div class="logo-title">R&D Parameter DB</div>
+                <div class="logo-subtitle">현대자동차</div>
+            </div>
+            <div class="nav-menu">
+    <div class="nav-item" onclick="location.href='index.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        데이터조회
+    </div>
+    <div class="nav-item active" onclick="location.href='create-step1.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        데이터 생성
+    </div>
+    <div class="nav-item" onclick="location.href='kpi-analysis.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        해석
+    </div>
+    <div class="nav-item" onclick="location.href='simulation-setup.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+        </svg>
+        시뮬레이션
+    </div>
+</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Card List Sidebar -->
+            <div class="card-sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">카드 목록</div>
+                    <div class="sidebar-buttons">
+                        <button class="btn-import-all" onclick="importAllCards()">모두 배치하기</button>
+                        <button class="btn-clear-all" onclick="clearAllCards()">모두 되돌리기</button>
+                    </div>
+                </div>
+                <div class="card-list" id="cardList">
+                    <!-- 카드 목록 -->
+                </div>
+            </div>
+
+            <!-- Work Area -->
+            <div class="work-area">
+                <!-- Top Bar -->
+                <div class="top-bar">
+                    <div class="page-title-section">
+                        <h1 class="page-title">모델 & 카드 연결</h1>
+                        <div class="step-indicator">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            STEP 2/2
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" onclick="goBack()">← 이전 단계로</button>
+                        <button class="btn btn-secondary" onclick="uploadModelImage()">도면 업로드</button>
+                        <button class="btn btn-primary" onclick="openSaveModal()">도면 완료</button>
+                    </div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="canvas-container">
+                    <div class="canvas" id="canvas">
+                        <div class="upload-prompt" id="uploadPrompt">
+                            <p>도면 이미지를 업로드하세요</p>
+                            <button onclick="uploadModelImage()">이미지 선택</button>
+                        </div>
+                        <svg style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5;">
+                            <g id="connectionLines"></g>
+                        </svg>
+                    </div>
+
+                    <!-- Canvas Controls -->
+                    <div class="canvas-controls">
+                        <!-- Zoom Controls -->
+                        <div class="canvas-control-group">
+                            <button class="control-btn" onclick="zoomIn()" title="확대">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            <div class="zoom-level" id="zoomLevel">100%</div>
+                            <button class="control-btn" onclick="zoomOut()" title="축소">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            <button class="control-btn" onclick="resetZoom()" title="초기화">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Anchor Mode Controls -->
+                        <div class="canvas-control-group">
+                            <button class="control-btn" id="anchorModeBtn2" onclick="toggleAnchorMode()" title="앵커 추가 모드">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            <button class="control-btn" onclick="clearAllAnchors()" title="앵커 전체 삭제">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="modelImageInput" accept="image/*" onchange="handleModelImageUpload(event)">
+
+    <script>
+        // State
+        let cards = [];
+        let canvasCards = [];
+        let anchors = [];
+        let connections = [];
+        let anchorMode = false;
+        let anchorCounter = 1;
+        let selectedCard = null; // 선택된 카드 (앵커 연결용)
+        let modelImage = null;
+        let draggedCard = null;
+        let dragOffset = { x: 0, y: 0 };
+        let zoomLevel = 1;
+        let nextCardPosition = { x: 100, y: 100 };
+
+        // 편집 모드 관련
+        let isEditMode = false;
+        let currentProjectId = null;
+        let currentProjectData = null;
+
+        const GRID_SIZE = 40;
+        const CARD_WIDTH = 320;
+        const CARD_SPACING = 60;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            checkEditMode();
+        });
+
+        // Check if editing existing project
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projectId');
+
+            if (projectId) {
+                isEditMode = true;
+                currentProjectId = parseInt(projectId);
+                loadProjectData(currentProjectId);
+            } else {
+                isEditMode = false;
+                loadCardsFromStep1();
+                renderCardList();
+            }
+        }
+
+        // Load existing project data
+        function loadProjectData(projectId) {
+            const projectData = JSON.parse(localStorage.getItem(`project_${projectId}`));
+            if (!projectData) {
+                alert('프로젝트를 찾을 수 없습니다.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentProjectData = projectData;
+
+            // Load cards
+            cards = projectData.cards || [];
+
+            // Load layout
+            const layout = projectData.layout || {};
+            zoomLevel = layout.zoomLevel || 1;
+            anchors = layout.anchors || [];
+            connections = layout.connections || [];
+            anchorCounter = anchors.length + 1;
+
+            // Load canvas cards
+            if (layout.canvasCards && layout.canvasCards.length > 0) {
+                layout.canvasCards.forEach(savedCard => {
+                    const card = cards.find(c => c.id === savedCard.cardId);
+                    if (card) {
+                        const canvasCard = {
+                            id: Date.now() + Math.random(),
+                            cardId: card.id,
+                            card: card,
+                            x: savedCard.x,
+                            y: savedCard.y
+                        };
+                        canvasCards.push(canvasCard);
+                    }
+                });
+            }
+
+            // Load model image
+            if (layout.modelImageSrc) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('canvas');
+                    const uploadPrompt = document.getElementById('uploadPrompt');
+                    if (uploadPrompt) uploadPrompt.style.display = 'none';
+
+                    img.id = 'modelImage';
+                    img.className = 'model-image';
+                    img.style.position = 'absolute';
+                    img.style.maxWidth = '600px';
+                    img.style.maxHeight = '600px';
+                    img.style.left = '50%';
+                    img.style.top = '50%';
+                    img.style.transform = 'translate(-50%, -50%)';
+                    img.style.border = '2px dashed var(--progressive-blue)';
+                    img.style.cursor = 'crosshair';
+
+                    img.addEventListener('click', handleImageClick);
+
+                    canvas.insertBefore(img, canvas.firstChild.nextSibling);
+                    modelImage = img;
+
+                    // Render cards and connections after image is loaded
+                    canvasCards.forEach(canvasCard => renderCanvasCard(canvasCard));
+                    anchors.forEach(anchor => renderAnchor(anchor));
+                    updateConnectionLines();
+                    applyZoom();
+                };
+                img.src = layout.modelImageSrc;
+            }
+
+            renderCardList();
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            if (zoomLevel < 2) {
+                zoomLevel += 0.1;
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (zoomLevel > 0.5) {
+                zoomLevel -= 0.1;
+                applyZoom();
+            }
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const canvas = document.getElementById('canvas');
+            canvas.style.transform = `scale(${zoomLevel})`;
+            document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
+        }
+
+        // Find available position for new card
+        function findAvailablePosition() {
+            const container = document.querySelector('.canvas-container');
+            const maxX = container.offsetWidth - CARD_WIDTH - 100;
+            const maxY = container.offsetHeight - 400;
+
+            let x = nextCardPosition.x;
+            let y = nextCardPosition.y;
+
+            // Check if position overlaps with existing cards
+            let overlaps = true;
+            let attempts = 0;
+
+            while (overlaps && attempts < 50) {
+                overlaps = canvasCards.some(card => {
+                    const dx = Math.abs(card.x - x);
+                    const dy = Math.abs(card.y - y);
+                    return dx < CARD_WIDTH + CARD_SPACING && dy < 300;
+                });
+
+                if (overlaps) {
+                    x += CARD_WIDTH + CARD_SPACING;
+                    if (x > maxX) {
+                        x = 100;
+                        y += 400;
+                        if (y > maxY) {
+                            y = 100;
+                        }
+                    }
+                }
+                attempts++;
+            }
+
+            nextCardPosition = { x: x + CARD_WIDTH + CARD_SPACING, y: y };
+            if (nextCardPosition.x > maxX) {
+                nextCardPosition.x = 100;
+                nextCardPosition.y = y + 400;
+            }
+
+            return { x, y };
+        }
+
+        // Load Cards from Step 1
+        function loadCardsFromStep1() {
+            const savedTemplate = localStorage.getItem('currentTemplate');
+            if (savedTemplate) {
+                const template = JSON.parse(savedTemplate);
+                cards = template.cards || [];
+                console.log('Loaded cards:', cards);
+            } else {
+                // Sample data
+                cards = [
+                    {
+                        id: 1,
+                        partName: 'LWR_ARM, G',
+                        status: '신규',
+                        partNumber: '54443-SW000, Hs70',
+                        params: ['반경 P1', '반경 P2', '축 Q'],
+                        values: ['312', '312', '62']
+                    },
+                    {
+                        id: 2,
+                        partName: 'UPR_ARM(FRT/RR)',
+                        status: '신규',
+                        partNumber: '54443-SW000, H665',
+                        params: ['반경 P1', '반경 P2', '축 Q', '비틀림 R'],
+                        values: ['441', '441', '59', '22']
+                    }
+                ];
+            }
+        }
+
+        // Render Card List
+        function renderCardList() {
+            const cardList = document.getElementById('cardList');
+            cardList.innerHTML = '';
+
+            cards.forEach(card => {
+                const isOnCanvas = canvasCards.some(c => c.cardId === card.id);
+                if (isOnCanvas) return;
+
+                const item = document.createElement('div');
+                item.className = 'card-list-item';
+                item.draggable = true;
+                item.innerHTML = `
+                    <div class="card-list-item-name">${card.partName}</div>
+                    <div class="card-list-item-info">${card.params.length}개 파라미터</div>
+                `;
+                item.addEventListener('dragstart', (e) => e.dataTransfer.setData('cardId', card.id));
+                item.addEventListener('click', () => addCardToCanvas(card));
+                cardList.appendChild(item);
+            });
+        }
+
+        // Import All Cards
+        function importAllCards() {
+            if (!modelImage) {
+                alert('먼저 도면 이미지를 업로드하세요.');
+                return;
+            }
+
+            const container = document.querySelector('.canvas-container');
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            const radius = 400;
+            const angleStep = (Math.PI * 2) / cards.length;
+
+            cards.forEach((card, index) => {
+                if (canvasCards.some(c => c.cardId === card.id)) return;
+
+                const angle = angleStep * index;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+
+                addCardToCanvas(card, x, y);
+            });
+
+            renderCardList();
+        }
+
+        // Clear All Cards from Canvas
+        function clearAllCards() {
+            if (canvasCards.length === 0) {
+                alert('캔버스에 카드가 없습니다.');
+                return;
+            }
+
+            if (!confirm('캔버스의 모든 카드를 되돌리시겠습니까?')) {
+                return;
+            }
+
+            // Remove all card elements
+            canvasCards.forEach(canvasCard => {
+                const cardElement = document.getElementById(`canvas-card-${canvasCard.id}`);
+                if (cardElement) {
+                    cardElement.remove();
+                }
+            });
+
+            // Clear arrays
+            canvasCards = [];
+            connections = [];
+            selectedCard = null;
+
+            // Reset position counter
+            nextCardPosition = { x: 100, y: 100 };
+
+            // Update UI
+            updateConnectionLines();
+            renderCardList();
+        }
+
+        // Add Card to Canvas
+        function addCardToCanvas(card, x = null, y = null) {
+            // Check if already on canvas
+            if (canvasCards.some(c => c.cardId === card.id)) {
+                return;
+            }
+
+            // Find available position if not specified
+            if (x === null || y === null) {
+                const pos = findAvailablePosition();
+                x = pos.x;
+                y = pos.y;
+            }
+
+            const canvasCard = {
+                id: Date.now(),
+                cardId: card.id,
+                card: card,
+                x: snapToGrid(x),
+                y: snapToGrid(y)
+            };
+
+            canvasCards.push(canvasCard);
+            renderCanvasCard(canvasCard);
+            renderCardList();
+        }
+
+        function renderCanvasCard(canvasCard) {
+            const canvas = document.getElementById('canvas');
+            const cardElement = document.createElement('div');
+            cardElement.className = 'canvas-card';
+            cardElement.id = `canvas-card-${canvasCard.id}`;
+            cardElement.style.left = `${canvasCard.x}px`;
+            cardElement.style.top = `${canvasCard.y}px`;
+
+            const card = canvasCard.card;
+            
+            // Check if this card is connected to anchor (use cardId)
+            const isConnected = connections.some(conn => conn.cardId === canvasCard.cardId);
+            if (isConnected) {
+                cardElement.classList.add('connected');
+            }
+            
+            // Build params HTML with editable inputs
+            let paramsHTML = '';
+            card.params.forEach((param, index) => {
+                const value = card.values && card.values[index] ? card.values[index] : '';
+                const displayValue = value.includes(',') ? value.split(',').map(v => v.trim()).join(' | ') : value;
+                
+                paramsHTML += `
+                    <tr>
+                        <td>${param}</td>
+                        <td>
+                            <input type="text" 
+                                class="param-value-input" 
+                                value="${value || ''}" 
+                                onchange="updateParamValue(${canvasCard.id}, ${index}, this.value)"
+                                onclick="event.stopPropagation()"
+                                placeholder="값 입력">
+                        </td>
+                    </tr>
+                `;
+            });
+
+            cardElement.innerHTML = `
+                <div class="canvas-card-actions">
+                    <button class="card-action-btn" onclick="event.stopPropagation(); duplicateCanvasCard(${canvasCard.id})" title="복제">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z"/>
+                            <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn delete" onclick="event.stopPropagation(); deleteCanvasCard(${canvasCard.id})" title="삭제">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="canvas-card-header">
+                    <div class="header-row">
+                        <span class="header-label">부품명</span>
+                        <input type="text" class="header-input" value="${card.partName}" readonly>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">상태</span>
+                        <select class="header-select" disabled>
+                            <option value="신규" ${card.status === '신규' ? 'selected' : ''}>신규</option>
+                            <option value="기존" ${card.status === '기존' ? 'selected' : ''}>기존</option>
+                        </select>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">부품번호</span>
+                        <input type="text" class="header-input" value="${card.partNumber}" readonly>
+                    </div>
+                </div>
+                <div class="canvas-card-body">
+                    <table class="param-table">
+                        ${paramsHTML}
+                    </table>
+                </div>
+            `;
+
+            // Card selection (for anchor connection)
+            cardElement.addEventListener('click', (e) => {
+                if (!e.target.closest('.canvas-card-actions') && 
+                    !e.target.closest('.canvas-card-header') &&
+                    !e.target.closest('.param-value-input')) {
+                    selectCard(canvasCard.id);
+                }
+            });
+
+            // Drag from header
+            cardElement.querySelector('.canvas-card-header').addEventListener('mousedown', (e) => {
+                if (!e.target.closest('.canvas-card-actions')) {
+                    startDragCard(e, canvasCard);
+                }
+            });
+
+            canvas.appendChild(cardElement);
+        }
+
+        // Update parameter value
+        function updateParamValue(canvasCardId, paramIndex, newValue) {
+            const canvasCard = canvasCards.find(c => c.id === canvasCardId);
+            if (!canvasCard) return;
+
+            // Update the card's values array
+            if (!canvasCard.card.values) {
+                canvasCard.card.values = [];
+            }
+            canvasCard.card.values[paramIndex] = newValue;
+
+            // Also update in the main cards array
+            const mainCard = cards.find(c => c.id === canvasCard.cardId);
+            if (mainCard) {
+                if (!mainCard.values) {
+                    mainCard.values = [];
+                }
+                mainCard.values[paramIndex] = newValue;
+            }
+        }
+
+        // Select Card (for anchor connection)
+        function selectCard(canvasCardId) {
+            // Deselect all cards
+            document.querySelectorAll('.canvas-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Select this card
+            const cardElement = document.getElementById(`canvas-card-${canvasCardId}`);
+            if (cardElement && !cardElement.classList.contains('connected')) {
+                cardElement.classList.add('selected');
+                selectedCard = canvasCardId;
+            } else if (cardElement && cardElement.classList.contains('connected')) {
+                // Already connected, just show it's selected
+                selectedCard = canvasCardId;
+            }
+        }
+
+        // Duplicate card on canvas
+        function duplicateCanvasCard(canvasCardId) {
+            const canvasCard = canvasCards.find(c => c.id === canvasCardId);
+            if (!canvasCard) return;
+
+            const pos = findAvailablePosition();
+            addCardToCanvas(canvasCard.card, pos.x, pos.y);
+        }
+
+        // Delete card from canvas
+        function deleteCanvasCard(canvasCardId) {
+            const canvasCard = canvasCards.find(c => c.id === canvasCardId);
+            if (!canvasCard) return;
+
+            const cardElement = document.getElementById(`canvas-card-${canvasCardId}`);
+            if (cardElement) {
+                cardElement.remove();
+            }
+
+            // Clear selection if this card was selected
+            if (selectedCard === canvasCardId) {
+                selectedCard = null;
+            }
+
+            // Remove connections (use cardId)
+            connections = connections.filter(conn => conn.cardId !== canvasCard.cardId);
+            updateConnectionLines();
+
+            // Remove from array
+            canvasCards = canvasCards.filter(c => c.id !== canvasCardId);
+            renderCardList();
+        }
+
+        // Drag Card
+        function startDragCard(e, canvasCard) {
+            e.preventDefault();
+            draggedCard = canvasCard;
+            
+            const cardElement = document.getElementById(`canvas-card-${canvasCard.id}`);
+            const cardRect = cardElement.getBoundingClientRect();
+            
+            // Calculate offset relative to card
+            dragOffset.x = e.clientX - cardRect.left;
+            dragOffset.y = e.clientY - cardRect.top;
+
+            cardElement.classList.add('dragging');
+
+            document.addEventListener('mousemove', dragCard);
+            document.addEventListener('mouseup', stopDragCard);
+        }
+
+        function dragCard(e) {
+            if (!draggedCard) return;
+
+            const cardElement = document.getElementById(`canvas-card-${draggedCard.id}`);
+            const canvas = document.getElementById('canvas');
+            const canvasRect = canvas.getBoundingClientRect();
+
+            // Calculate new position accounting for zoom
+            const newX = (e.clientX - canvasRect.left) / zoomLevel - dragOffset.x / zoomLevel;
+            const newY = (e.clientY - canvasRect.top) / zoomLevel - dragOffset.y / zoomLevel;
+
+            // Apply position immediately without snap (for smooth dragging)
+            cardElement.style.left = `${newX}px`;
+            cardElement.style.top = `${newY}px`;
+
+            updateConnectionLines();
+        }
+
+        function stopDragCard(e) {
+            if (!draggedCard) return;
+
+            const cardElement = document.getElementById(`canvas-card-${draggedCard.id}`);
+            
+            // Get final position
+            const currentX = parseFloat(cardElement.style.left);
+            const currentY = parseFloat(cardElement.style.top);
+
+            // Apply snap (macOS-style smooth snap)
+            const snappedX = snapToGrid(currentX);
+            const snappedY = snapToGrid(currentY);
+
+            // Update stored position
+            draggedCard.x = snappedX;
+            draggedCard.y = snappedY;
+
+            // Apply snapped position (transition will animate it)
+            cardElement.style.left = `${snappedX}px`;
+            cardElement.style.top = `${snappedY}px`;
+            cardElement.classList.remove('dragging');
+
+            document.removeEventListener('mousemove', dragCard);
+            document.removeEventListener('mouseup', stopDragCard);
+
+            // Update connections after animation
+            setTimeout(() => {
+                updateConnectionLines();
+            }, 300);
+
+            draggedCard = null;
+        }
+
+        function snapToGrid(value) {
+            return Math.round(value / GRID_SIZE) * GRID_SIZE;
+        }
+
+        // Model Image Upload
+        function uploadModelImage() {
+            document.getElementById('modelImageInput').click();
+        }
+
+        function handleModelImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const canvas = document.getElementById('canvas');
+                const uploadPrompt = document.getElementById('uploadPrompt');
+                
+                if (uploadPrompt) uploadPrompt.remove();
+                if (modelImage) modelImage.remove();
+
+                modelImage = document.createElement('img');
+                modelImage.src = e.target.result;
+                modelImage.className = 'model-image';
+                modelImage.id = 'modelImage';
+                modelImage.addEventListener('click', handleModelImageClick);
+                canvas.appendChild(modelImage);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Anchor Mode
+        function toggleAnchorMode() {
+            anchorMode = !anchorMode;
+            const btn2 = document.getElementById('anchorModeBtn2');
+            const img = document.getElementById('modelImage');
+
+            if (anchorMode) {
+                btn2.classList.add('active');
+                if (img) img.classList.add('anchor-mode');
+            } else {
+                btn2.classList.remove('active');
+                if (img) img.classList.remove('anchor-mode');
+            }
+        }
+
+        function handleModelImageClick(e) {
+            if (!anchorMode) return;
+
+            const rect = e.target.getBoundingClientRect();
+            const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+            
+            const x = e.clientX - canvasRect.left;
+            const y = e.clientY - canvasRect.top;
+
+            createAnchor(x, y);
+        }
+
+        function createAnchor(x, y) {
+            const anchor = {
+                id: Date.now(),
+                label: `P${anchorCounter++}`,
+                x: x,
+                y: y
+            };
+
+            anchors.push(anchor);
+            renderAnchor(anchor);
+        }
+
+        function renderAnchor(anchor) {
+            const canvas = document.getElementById('canvas');
+            const anchorElement = document.createElement('div');
+            anchorElement.className = 'anchor-point';
+            anchorElement.id = `anchor-${anchor.id}`;
+            anchorElement.style.left = `${anchor.x}px`;
+            anchorElement.style.top = `${anchor.y}px`;
+            anchorElement.innerHTML = `<div class="anchor-label">${anchor.label}</div>`;
+            anchorElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleAnchorClick(anchor);
+            });
+
+            canvas.appendChild(anchorElement);
+        }
+
+        function clearAllAnchors() {
+            if (!confirm('모든 앵커 포인트를 삭제하시겠습니까?')) return;
+
+            anchors.forEach(anchor => {
+                const element = document.getElementById(`anchor-${anchor.id}`);
+                if (element) element.remove();
+            });
+
+            anchors = [];
+            connections = [];
+            anchorCounter = 1;
+            updateConnectionLines();
+        }
+
+        // Select Parameter
+        function selectParam(canvasCardId, paramIndex) {
+            document.querySelectorAll('.param-table tr').forEach(tr => {
+                tr.classList.remove('selected');
+            });
+
+            const paramRow = document.getElementById(`param-${canvasCardId}-${paramIndex}`);
+            if (paramRow) {
+                paramRow.classList.add('selected');
+                selectedParam = { canvasCardId, paramIndex };
+            }
+        }
+
+        // Connect to Anchor
+        function handleAnchorClick(anchor) {
+            if (!selectedCard) {
+                alert('먼저 연결할 카드를 선택하세요.');
+                return;
+            }
+
+            // Get the actual card's id (not canvasCard id)
+            const canvasCard = canvasCards.find(c => c.id === selectedCard);
+            if (!canvasCard) return;
+
+            const cardId = canvasCard.cardId;
+
+            // Check if already connected
+            const existingConnIndex = connections.findIndex(conn => 
+                conn.cardId === cardId
+            );
+
+            if (existingConnIndex !== -1) {
+                // Update existing connection
+                connections[existingConnIndex].anchorId = anchor.id;
+            } else {
+                // Create new connection
+                const connection = {
+                    id: Date.now(),
+                    cardId: cardId,  // Use card's original id
+                    anchorId: anchor.id
+                };
+                connections.push(connection);
+            }
+
+            // Update UI
+            const cardElement = document.getElementById(`canvas-card-${selectedCard}`);
+            if (cardElement) {
+                cardElement.classList.remove('selected');
+                cardElement.classList.add('connected');
+            }
+
+            updateConnectionLines();
+            selectedCard = null;
+        }
+
+        // Draw Connection Lines
+        function updateConnectionLines() {
+            const svg = document.getElementById('connectionLines');
+            svg.innerHTML = '';
+
+            connections.forEach(conn => {
+                // Find canvasCard by cardId
+                const canvasCard = canvasCards.find(cc => cc.cardId === conn.cardId);
+                const anchor = anchors.find(a => a.id === conn.anchorId);
+
+                if (!canvasCard || !anchor) return;
+
+                const cardElement = document.getElementById(`canvas-card-${canvasCard.id}`);
+                if (!cardElement) return;
+
+                const rect = cardElement.getBoundingClientRect();
+                const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+
+                // Calculate line from card right-center to anchor
+                const x1 = (rect.right - canvasRect.left) / zoomLevel;
+                const y1 = (rect.top + rect.height / 2 - canvasRect.top) / zoomLevel;
+                const x2 = anchor.x;
+                const y2 = anchor.y;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.style.stroke = '#ff0000';
+                line.style.strokeWidth = '2';
+
+                svg.appendChild(line);
+            });
+        }
+
+        // Navigation
+        function goBack() {
+            if (confirm('이전 단계로 돌아가시겠습니까?')) {
+                window.location.href = 'create-step1.html';
+            }
+        }
+
+        // Save Modal Functions
+        function openSaveModal() {
+            if (!modelImage) {
+                alert('먼저 도면 이미지를 업로드하세요.');
+                return;
+            }
+            
+            if (canvasCards.length === 0) {
+                alert('배치된 카드가 없습니다.');
+                return;
+            }
+
+            // 편집 모드일 경우 기존 데이터로 채우기
+            if (isEditMode && currentProjectData) {
+                document.getElementById('saveProjectName').value = currentProjectData.meta.projectName || '';
+                document.getElementById('saveCategory').value = currentProjectData.meta.category || '';
+                document.getElementById('saveDescription').value = currentProjectData.meta.description || '';
+            } else {
+                document.getElementById('saveProjectName').value = '';
+                document.getElementById('saveCategory').value = '';
+                document.getElementById('saveDescription').value = '';
+            }
+
+            document.getElementById('saveModal').style.display = 'flex';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').style.display = 'none';
+            document.getElementById('saveProjectName').value = '';
+            document.getElementById('saveCategory').value = '';
+            document.getElementById('saveDescription').value = '';
+        }
+
+        function confirmSave() {
+            const projectName = document.getElementById('saveProjectName').value.trim();
+            const category = document.getElementById('saveCategory').value;
+            
+            if (!projectName) {
+                alert('프로젝트명을 입력하세요.');
+                return;
+            }
+            
+            if (!category) {
+                alert('카테고리를 선택하세요.');
+                return;
+            }
+
+            const description = document.getElementById('saveDescription').value.trim();
+
+            // 저장할 데이터 구조
+            const saveData = {
+                meta: {
+                    projectName: projectName,
+                    category: category,
+                    description: description,
+                    createdAt: isEditMode ? currentProjectData.meta.createdAt : new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    step: 2
+                },
+                cards: cards,
+                layout: {
+                    canvasCards: canvasCards.map(cc => ({
+                        cardId: cc.cardId,
+                        x: cc.x,
+                        y: cc.y
+                    })),
+                    anchors: anchors,
+                    connections: connections,
+                    zoomLevel: zoomLevel,
+                    modelImageSrc: modelImage ? modelImage.src : null
+                }
+            };
+
+            if (isEditMode) {
+                // 편집 모드: 기존 프로젝트 업데이트
+                localStorage.setItem(`project_${currentProjectId}`, JSON.stringify(saveData));
+
+                // 프로젝트 목록 업데이트
+                let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
+                const projectIndex = projectList.findIndex(p => p.id === currentProjectId);
+                if (projectIndex !== -1) {
+                    projectList[projectIndex] = {
+                        ...projectList[projectIndex],
+                        name: projectName,
+                        category: category,
+                        cardCount: cards.length
+                    };
+                    localStorage.setItem('projectList', JSON.stringify(projectList));
+                }
+
+                closeSaveModal();
+                alert(`"${projectName}" 프로젝트가 업데이트되었습니다.`);
+                
+                if (confirm('프로젝트 조회로 돌아가시겠습니까?')) {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.href = `view-detail.html?id=${currentProjectId}`;
+                }
+            } else {
+                // 신규 생성 모드
+                const projectId = Date.now();
+                const projectKey = `project_${projectId}`;
+                localStorage.setItem(projectKey, JSON.stringify(saveData));
+
+                let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
+                projectList.push({
+                    id: projectId,
+                    name: projectName,
+                    category: category,
+                    createdAt: saveData.meta.createdAt,
+                    cardCount: cards.length
+                });
+                localStorage.setItem('projectList', JSON.stringify(projectList));
+
+                closeSaveModal();
+                alert(`"${projectName}" 프로젝트가 저장되었습니다.`);
+                
+                if (confirm('프로젝트 조회로 돌아가시겠습니까?')) {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.href = `view-detail.html?id=${projectId}`;
+                }
+            }
+        }
+
+        // Drag from Sidebar
+        document.getElementById('canvas').addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.getElementById('canvas').addEventListener('drop', (e) => {
+            e.preventDefault();
+            const cardId = parseInt(e.dataTransfer.getData('cardId'));
+            const card = cards.find(c => c.id === cardId);
+            if (card) {
+                const canvasRect = e.target.getBoundingClientRect();
+                const x = e.clientX - canvasRect.left;
+                const y = e.clientY - canvasRect.top;
+                addCardToCanvas(card, x, y);
+            }
+        });
+    </script>
+
+    <!-- Save Modal -->
+    <div class="save-modal-overlay" id="saveModal">
+        <div class="save-modal">
+            <div class="save-modal-header">
+                <div class="save-modal-title">도면 저장</div>
+                <button class="save-modal-close" onclick="closeSaveModal()">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="save-modal-body">
+                <div class="save-form-group">
+                    <label class="save-form-label required">프로젝트명</label>
+                    <input type="text" class="save-form-input" id="saveProjectName" placeholder="예: 2025 EV 차체 파라미터">
+                </div>
+                <div class="save-form-group">
+                    <label class="save-form-label required">카테고리</label>
+                    <select class="save-form-select" id="saveCategory">
+                        <option value="">선택하세요</option>
+                        <option value="파워트레인">파워트레인</option>
+                        <option value="섀시">섀시</option>
+                        <option value="차체">차체</option>
+                        <option value="전기전자">전기전자</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+                <div class="save-form-group">
+                    <label class="save-form-label">설명</label>
+                    <textarea class="save-form-textarea" id="saveDescription" placeholder="프로젝트에 대한 간단한 설명 (선택사항)"></textarea>
+                </div>
+            </div>
+            <div class="save-modal-footer">
+                <button class="btn btn-outline" onclick="closeSaveModal()">취소</button>
+                <button class="btn btn-primary" onclick="confirmSave()">저장</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

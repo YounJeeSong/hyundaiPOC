@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI 시뮬레이션 설정 - 현대자동차 R&D</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            --hyundai-blue: #002c5f;
+            --white: #ffffff;
+            --black: #000000;
+            --hyundai-sand: #e4dcd3;
+            --hyundai-light-sand: #f6f3f2;
+            --grey-dark: #676767;
+            --grey-light: #cccccc;
+            --grey-disabled: #999999;
+            --progressive-blue: #00aad2;
+            --active-red: #e63312;
+            --success-green: #28a745;
+            --warning-yellow: #f9a825;
+            --yellow-light: #fffbea;
+            
+            --font-text: 'Noto Sans KR', sans-serif;
+            --weight-light: 300;
+            --weight-regular: 400;
+            --weight-medium: 500;
+            --weight-bold: 700;
+            
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-40: 40px;
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            
+            --shadow-sm: 0 2px 4px rgba(0, 44, 95, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 44, 95, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 44, 95, 0.15);
+            
+            --transition: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: var(--hyundai-light-sand);
+            color: var(--black);
+        }
+
+        /* ===== LAYOUT ===== */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Global Navigation */
+        .global-nav {
+            width: 240px;
+            background: var(--hyundai-blue);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            padding: var(--space-24);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-title {
+            font-size: 20px;
+            font-weight: var(--weight-medium);
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: var(--space-4);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: var(--space-16);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+            padding: var(--space-12) var(--space-16);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: var(--space-4);
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: var(--progressive-blue);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 70px;
+            background: var(--white);
+            border-bottom: 1px solid var(--hyundai-sand);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-32);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-24);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            font-size: 14px;
+            color: var(--grey-dark);
+        }
+
+        .breadcrumb-link {
+            color: var(--progressive-blue);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: var(--space-12);
+        }
+
+        /* Stepper */
+        .stepper {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-16) var(--space-32);
+            background: var(--white);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            font-size: 14px;
+            color: var(--grey-dark);
+        }
+
+        .step.completed {
+            color: var(--success-green);
+        }
+
+        .step.active {
+            color: var(--hyundai-blue);
+            font-weight: var(--weight-medium);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: var(--weight-medium);
+            background: var(--grey-light);
+            color: var(--white);
+        }
+
+        .step.completed .step-number {
+            background: var(--success-green);
+        }
+
+        .step.active .step-number {
+            background: var(--hyundai-blue);
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 2px;
+            background: var(--grey-light);
+        }
+
+        .step.completed + .step-connector,
+        .step-connector.completed {
+            background: var(--success-green);
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-32);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-24);
+            max-width: 1400px;
+        }
+
+        /* Section Card */
+        .section-card {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .section-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .section-header {
+            padding: var(--space-16) var(--space-20);
+            border-bottom: 1px solid var(--hyundai-sand);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--hyundai-light-sand);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .section-badge {
+            font-size: 12px;
+            padding: var(--space-4) var(--space-12);
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+        }
+
+        .section-body {
+            padding: var(--space-20);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: var(--space-20);
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: var(--space-8);
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--active-red);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            height: 46px;
+            padding: 0 var(--space-16);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: var(--font-text);
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--progressive-blue);
+            box-shadow: 0 0 0 3px rgba(0, 170, 210, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--grey-disabled);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-8);
+            padding: var(--space-12) var(--space-24);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: var(--weight-medium);
+            font-family: var(--font-text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--hyundai-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--hyundai-blue);
+            border: 1px solid var(--hyundai-sand);
+        }
+
+        .btn-secondary:hover {
+            background: var(--hyundai-light-sand);
+            border-color: var(--hyundai-blue);
+        }
+
+        .btn-progressive {
+            background: var(--progressive-blue);
+            color: var(--white);
+        }
+
+        .btn-progressive:hover {
+            background: #0099bb;
+        }
+
+        .btn-sm {
+            padding: var(--space-8) var(--space-16);
+            font-size: 13px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: var(--radius-sm);
+        }
+
+        /* KPI List */
+        .kpi-list {
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .kpi-list-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-12) var(--space-16);
+            background: var(--yellow-light);
+            font-size: 12px;
+            font-weight: var(--weight-bold);
+            color: var(--black);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .kpi-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-12) var(--space-16);
+            border-bottom: 1px solid var(--hyundai-sand);
+            transition: var(--transition);
+        }
+
+        .kpi-item:last-child {
+            border-bottom: none;
+        }
+
+        .kpi-item:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .kpi-item.selected {
+            background: rgba(0, 170, 210, 0.08);
+        }
+
+        .kpi-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--progressive-blue);
+        }
+
+        .kpi-category {
+            font-size: 13px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            background: var(--hyundai-light-sand);
+            padding: var(--space-4) var(--space-8);
+            border-radius: var(--radius-sm);
+        }
+
+        .kpi-name {
+            font-size: 13px;
+            color: var(--black);
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: var(--grey-dark);
+            text-align: center;
+        }
+
+        .kpi-base {
+            font-size: 13px;
+            font-weight: var(--weight-medium);
+            color: var(--progressive-blue);
+            text-align: center;
+        }
+
+        .kpi-target {
+            font-size: 13px;
+            color: var(--black);
+            text-align: center;
+        }
+
+        /* Case Section */
+        .case-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-16);
+        }
+
+        .case-card {
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .case-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-12) var(--space-16);
+            background: var(--hyundai-light-sand);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .case-title {
+            font-size: 14px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .case-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+        }
+
+        .case-body {
+            padding: var(--space-16);
+        }
+
+        .case-param-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px 1fr;
+            gap: var(--space-12);
+            align-items: center;
+            margin-bottom: var(--space-12);
+        }
+
+        .case-param-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .case-param-select {
+            height: 40px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+
+        .case-arrow {
+            text-align: center;
+            color: var(--grey-dark);
+            font-size: 18px;
+        }
+
+        .case-value-input {
+            height: 40px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+
+        .case-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-8);
+            padding-top: var(--space-12);
+            border-top: 1px solid var(--hyundai-sand);
+            margin-top: var(--space-12);
+        }
+
+        .add-case-btn {
+            width: 100%;
+            padding: var(--space-16);
+            border: 2px dashed var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--grey-dark);
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-8);
+        }
+
+        .add-case-btn:hover {
+            border-color: var(--progressive-blue);
+            color: var(--progressive-blue);
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        /* Version Info Box */
+        .version-info-box {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-12) var(--space-16);
+            background: rgba(0, 170, 210, 0.08);
+            border-left: 3px solid var(--progressive-blue);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-16);
+            font-size: 13px;
+            color: var(--grey-dark);
+        }
+
+        .version-info-box svg {
+            flex-shrink: 0;
+            color: var(--progressive-blue);
+        }
+
+        /* Version Select in Case */
+        .version-select-wrapper {
+            margin-bottom: var(--space-16);
+        }
+
+        .version-select-label {
+            display: block;
+            font-size: 12px;
+            font-weight: var(--weight-medium);
+            color: var(--grey-dark);
+            margin-bottom: var(--space-8);
+        }
+
+        .version-select {
+            width: 100%;
+            height: 46px;
+            padding: 0 var(--space-16);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: var(--font-text);
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        .version-select:focus {
+            outline: none;
+            border-color: var(--progressive-blue);
+        }
+
+        /* Parameter Preview - Editable */
+        .param-preview {
+            background: var(--hyundai-light-sand);
+            border-radius: var(--radius-sm);
+            padding: var(--space-16);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .param-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-12);
+            position: sticky;
+            top: -16px;
+            background: var(--hyundai-light-sand);
+            padding: var(--space-8) 0;
+            z-index: 1;
+        }
+
+        .param-preview-title {
+            font-size: 12px;
+            font-weight: var(--weight-medium);
+            color: var(--grey-dark);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .param-preview-count {
+            background: var(--progressive-blue);
+            color: var(--white);
+            padding: 2px 8px;
+            border-radius: var(--radius-lg);
+            font-size: 11px;
+            margin-left: var(--space-8);
+        }
+
+        .param-preview-empty {
+            text-align: center;
+            color: var(--grey-disabled);
+            font-size: 13px;
+            padding: var(--space-16);
+        }
+
+        .btn-reset {
+            padding: var(--space-4) var(--space-12);
+            font-size: 11px;
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            color: var(--grey-dark);
+            cursor: pointer;
+        }
+
+        .btn-reset:hover {
+            background: var(--hyundai-light-sand);
+            border-color: var(--grey-dark);
+        }
+
+        .param-card-editable {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-12);
+            overflow: hidden;
+        }
+
+        .param-card-editable:last-child {
+            margin-bottom: 0;
+        }
+
+        .param-card-header {
+            background: var(--hyundai-sand);
+            padding: var(--space-12) var(--space-16);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .param-card-header:hover {
+            background: #d9d1c8;
+        }
+
+        .param-card-title {
+            font-size: 14px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+        }
+
+        .param-card-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .param-card-part-number {
+            font-size: 11px;
+            color: var(--grey-dark);
+        }
+
+        .param-card-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(0, 170, 210, 0.15);
+            color: var(--progressive-blue);
+            border-radius: var(--radius-sm);
+        }
+
+        .param-card-toggle {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s;
+        }
+
+        .param-card-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .param-card-body {
+            padding: var(--space-16);
+            border-top: 1px solid var(--hyundai-sand);
+        }
+
+        .param-card-body.collapsed {
+            display: none;
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-12);
+        }
+
+        .param-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .param-input-label {
+            font-size: 11px;
+            color: var(--grey-dark);
+            font-weight: var(--weight-medium);
+        }
+
+        .param-input {
+            width: 100%;
+            height: 36px;
+            padding: 0 var(--space-8);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font-text);
+            text-align: center;
+            color: var(--black);
+            transition: var(--transition);
+        }
+
+        .param-input:focus {
+            outline: none;
+            border-color: var(--progressive-blue);
+        }
+
+        .param-input.modified {
+            color: var(--progressive-blue);
+            font-weight: var(--weight-bold);
+            border-color: var(--progressive-blue);
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        .param-input-default {
+            font-size: 10px;
+            color: var(--grey-disabled);
+            text-align: center;
+        }
+
+        .param-input-default.hidden {
+            visibility: hidden;
+        }
+
+        /* Version List Summary */
+        .version-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+        }
+
+        .version-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-12);
+            background: var(--hyundai-light-sand);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--progressive-blue);
+        }
+
+        .version-list-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .version-list-item-name {
+            font-size: 14px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+        }
+
+        .version-list-item-date {
+            font-size: 12px;
+            color: var(--grey-dark);
+        }
+
+        .version-list-item-cards {
+            font-size: 12px;
+            color: var(--grey-dark);
+            background: var(--white);
+            padding: var(--space-4) var(--space-8);
+            border-radius: var(--radius-sm);
+        }
+
+        /* Input Parameter Summary */
+        .input-summary {
+            background: var(--hyundai-light-sand);
+            border-radius: var(--radius-sm);
+            padding: var(--space-16);
+            margin-bottom: var(--space-16);
+        }
+
+        .input-summary-title {
+            font-size: 13px;
+            font-weight: var(--weight-medium);
+            color: var(--grey-dark);
+            margin-bottom: var(--space-12);
+        }
+
+        .input-param-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-8);
+        }
+
+        .input-param-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4) var(--space-12);
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--radius-lg);
+            font-size: 12px;
+            color: var(--hyundai-blue);
+        }
+
+        .input-param-value {
+            font-weight: var(--weight-medium);
+            color: var(--progressive-blue);
+        }
+
+        /* Action Footer */
+        .action-footer {
+            padding: var(--space-20) var(--space-32);
+            background: var(--white);
+            border-top: 1px solid var(--hyundai-sand);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-info {
+            font-size: 14px;
+            color: var(--grey-dark);
+        }
+
+        .footer-info strong {
+            color: var(--hyundai-blue);
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: var(--space-12);
+        }
+
+        .btn-run {
+            background: var(--hyundai-blue);
+            color: var(--white);
+            padding: var(--space-16) var(--space-32);
+            font-size: 16px;
+        }
+
+        .btn-run:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Loading Modal */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 44, 95, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            padding: var(--space-40);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--hyundai-sand);
+            border-top-color: var(--progressive-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-24);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 20px;
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: var(--space-8);
+        }
+
+        .loading-message {
+            font-size: 14px;
+            color: var(--grey-dark);
+            margin-bottom: var(--space-24);
+        }
+
+        .loading-progress {
+            width: 100%;
+            height: 8px;
+            background: var(--hyundai-light-sand);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: var(--progressive-blue);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-40);
+            color: var(--grey-dark);
+        }
+
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: var(--space-16);
+            opacity: 0.3;
+        }
+
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: var(--weight-medium);
+            margin-bottom: var(--space-8);
+        }
+
+        .empty-state-desc {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Navigation -->
+        <nav class="global-nav">
+            <div class="logo-area">
+                <div class="logo-title">R&D Parameter DB</div>
+                <div class="logo-subtitle">현대자동차</div>
+            </div>
+                        <div class="nav-menu">
+                <div class="nav-item" onclick="location.href='index.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    데이터조회
+                </div>
+                <div class="nav-item" onclick="location.href='create-step1.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                    </svg>
+                    데이터 생성
+                </div>
+                <div class="nav-item" onclick="location.href='kpi-analysis.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    해석
+                </div>
+                <div class="nav-item active" onclick="location.href='simulation-setup.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                    </svg>
+                    시뮬레이션
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <div class="breadcrumb">
+                        <a class="breadcrumb-link" href="index.html">홈</a>
+                        <span>›</span>
+                        <span>KPI 시뮬레이션</span>
+                        <span>›</span>
+                        <span>설정</span>
+                    </div>
+                    <h1 class="page-title">KPI 시뮬레이션 설정</h1>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn btn-secondary" onclick="saveDraft()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
+                        </svg>
+                        임시 저장
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stepper -->
+            <div class="stepper">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <span>KPI 설정 & 시뮬레이션 실행</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <span>결과 조회</span>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="content-grid">
+                    
+                    <!-- Performance 설정 -->
+                    <div class="section-card full-width">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                                </svg>
+                                Performance 설정
+                            </div>
+                        </div>
+                        <div class="section-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-24);">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label required">Performance 유형</label>
+                                    <select class="form-select" id="performanceType" onchange="loadKPIList()">
+                                        <option value="">선택하세요</option>
+                                        <option value="rr_suspension">RR Suspension K&C</option>
+                                        <option value="fr_suspension">FR Suspension K&C</option>
+                                        <option value="handling">Handling (조종안정성)</option>
+                                        <option value="ride">Ride (승차감)</option>
+                                        <option value="nvh">NVH</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">Performance 명칭 (선택)</label>
+                                    <input type="text" class="form-input" id="performanceName" placeholder="예: 2025 신규 서스펜션 검증">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI List & Target -->
+                    <div class="section-card full-width">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                </svg>
+                                KPI List & Target
+                            </div>
+                        </div>
+                        <div class="section-body">
+                            <div id="kpiListContainer">
+                                <div class="empty-state">
+                                    <svg class="empty-state-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                    </svg>
+                                    <div class="empty-state-title">KPI List가 없습니다</div>
+                                    <div class="empty-state-desc">먼저 Performance 유형을 선택해주세요</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Case 설정 (버전 선택) -->
+                    <div class="section-card full-width">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+                                </svg>
+                                Case 설정 (버전 선택)
+                            </div>
+                            <span class="section-badge" id="caseCount">0개 Case</span>
+                        </div>
+                        <div class="section-body">
+                            <div class="version-info-box">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>파라미터 DB에서 버전을 선택하여 각 Case의 입력값을 설정합니다.</span>
+                            </div>
+                            <div class="case-container" id="caseContainer">
+                                <!-- Case cards will be added here -->
+                            </div>
+                            <button class="add-case-btn" onclick="addCase()">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                                </svg>
+                                Case 추가
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Action Footer -->
+            <div class="action-footer">
+                <div class="footer-info">
+                    선택된 KPI: <strong id="selectedKpiCount">0</strong>개 | 설정된 Case: <strong id="footerCaseCount">0</strong>개
+                </div>
+                <div class="footer-actions">
+                    <button class="btn btn-secondary" onclick="location.href='index.html'">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        홈으로
+                    </button>
+                    <button class="btn btn-run" onclick="runSimulation()" id="runBtn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                        </svg>
+                        시뮬레이션 실행
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="loading-spinner"></div>
+            <div class="loading-title">시뮬레이션 실행 중</div>
+            <div class="loading-message" id="loadingMessage">데이터를 준비하고 있습니다...</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA =====
+        let inputParams = [];
+        let selectedKPIs = [];
+        let cases = [];
+        let caseIdCounter = 0;
+
+        // 버전 데이터베이스 (파라미터 DB 모듈에서 불러온다고 가정)
+        const versionDatabase = [
+            {
+                id: 'v1.0',
+                name: 'v1.0 - 초기 설계안',
+                createdAt: '2025-01-15',
+                category: 'MECHA',
+                carType: 'ABC',
+                cards: [
+                    { cardName: 'UPR_ARM(FRT/RR)', partNumber: '54443-SW000, Hs65', status: 'RG3 C/O', params: [
+                        { name: '반경 P1', value: '441' },
+                        { name: '반경 P2', value: '441' },
+                        { name: '축 Q', value: '59' },
+                        { name: '비틀림 R', value: '22' },
+                        { name: '굽힘 S', value: '15' }
+                    ]},
+                    { cardName: 'LWR ARM, G', partNumber: '54443-SW000, Hs70', status: '신규', params: [
+                        { name: '반경 P1', value: '312' },
+                        { name: '반경 P2', value: '312' },
+                        { name: '축 Q', value: '62' },
+                        { name: '비틀림 R', value: '18' },
+                        { name: '굽힘 S1', value: '85' },
+                        { name: '굽힘 S2', value: '89' }
+                    ]},
+                    { cardName: 'LWR ARM, A', partNumber: '54551-SW000, Hs47', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '834' },
+                        { name: '반경 P2', value: '774' },
+                        { name: '축 Q', value: '35' },
+                        { name: '비틀림 R', value: '16' },
+                        { name: '굽힘 S1', value: '85' },
+                        { name: '굽힘 S2', value: '89' }
+                    ]},
+                    { cardName: 'STAB/BAR MTG', partNumber: '54443-3M000, Hs60', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '102' },
+                        { name: '반경 P2', value: '102' },
+                        { name: '축 Q', value: '45' },
+                        { name: '비틀림 R', value: '12' },
+                        { name: '굽힘 S', value: '28' }
+                    ]},
+                    { cardName: 'INSULATOR', partNumber: '54610-EC700, Hs53', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '102' },
+                        { name: '반경 P2', value: '102' },
+                        { name: '축 Q', value: '102' },
+                        { name: '비틀림 R', value: '34' },
+                        { name: '굽힘 S', value: '34.0' }
+                    ]},
+                    { cardName: 'S/ABS LWR', partNumber: '54651-2J950, Hs55', status: 'HM C/O', params: [
+                        { name: '반경 P1', value: '1447' },
+                        { name: '반경 P2', value: '1447' },
+                        { name: '축 Q', value: '55.2' },
+                        { name: '비틀림 R', value: '34.1' },
+                        { name: '굽힘 S', value: '96.1' }
+                    ]},
+                    { cardName: 'B/STP', partNumber: '54443-3M000', status: '신규', params: [
+                        { name: 'mm (0.0)', value: '0' },
+                        { name: 'mm (10.0)', value: '400' },
+                        { name: 'mm (22.0)', value: '5000' },
+                        { name: 'mm (34.0)', value: '23000' }
+                    ]},
+                    { cardName: 'HARD POINT (LH)', partNumber: '', status: '', params: [
+                        { name: 'LWR_ARM, BODY (A)', value: '-200.000, 390.000, -81.000' },
+                        { name: 'LATERAL_ARM, KUNC (B)', value: '-201.000, 391.000, -82.000' },
+                        { name: 'COMP_ARM, BODY (G)', value: '-202.000, 392.000, -83.000' },
+                        { name: 'TIE_ROD, INR (T)', value: '-203.000, 393.000, -84.000' },
+                        { name: 'TIRE_ROD, OTR (H)', value: '-204.000, 394.000, -85.000' }
+                    ]},
+                    { cardName: 'SPRING', partNumber: '', status: '', params: [
+                        { name: 'UPPER, S0', value: '1, 2, 3' },
+                        { name: 'LOWER, S1', value: '4, 5, 6' },
+                        { name: 'STIFFNESS (kgf/mm)', value: '6.6' }
+                    ]},
+                    { cardName: 'S/ABS', partNumber: '', status: '', params: [
+                        { name: 'UPR, X0', value: '1, 2, 3' },
+                        { name: 'LWR, X1', value: '4, 5, 6' },
+                        { name: 'SIZE', value: '외경Ø74 X 내경19.5 X 높이 52.2' },
+                        { name: '재질', value: 'MH24-60' }
+                    ]},
+                    { cardName: 'BUMP STOPPER', partNumber: '', status: '', params: [
+                        { name: 'C~스토퍼', value: '26.300' },
+                        { name: 'B/HEIGHT', value: '15.000' },
+                        { name: 'Clearance', value: '14.000' }
+                    ]},
+                    { cardName: 'STAB. BAR', partNumber: '', status: '', params: [
+                        { name: 'X/MBR MTG', value: '-100.000, 543.000, -6.300' },
+                        { name: 'S/ABS', value: '-100.000, 543.000, -6.300' },
+                        { name: 'EYE PT', value: '-100.000, 543.000, -6.300' },
+                        { name: 'DIA. (mm)', value: '중공 Φ 25.0x4.5t' }
+                    ]}
+                ]
+            },
+            {
+                id: 'v1.1',
+                name: 'v1.1 - 축 강성 개선안',
+                createdAt: '2025-01-20',
+                category: 'MECHA',
+                carType: 'ABC',
+                cards: [
+                    { cardName: 'UPR_ARM(FRT/RR)', partNumber: '54443-SW000, Hs65', status: 'RG3 C/O', params: [
+                        { name: '반경 P1', value: '441' },
+                        { name: '반경 P2', value: '441' },
+                        { name: '축 Q', value: '65' },
+                        { name: '비틀림 R', value: '22' },
+                        { name: '굽힘 S', value: '15' }
+                    ]},
+                    { cardName: 'LWR ARM, G', partNumber: '54443-SW000, Hs70', status: '신규', params: [
+                        { name: '반경 P1', value: '320' },
+                        { name: '반경 P2', value: '320' },
+                        { name: '축 Q', value: '68' },
+                        { name: '비틀림 R', value: '18' },
+                        { name: '굽힘 S1', value: '85' },
+                        { name: '굽힘 S2', value: '89' }
+                    ]},
+                    { cardName: 'LWR ARM, A', partNumber: '54551-SW000, Hs47', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '840' },
+                        { name: '반경 P2', value: '780' },
+                        { name: '축 Q', value: '38' },
+                        { name: '비틀림 R', value: '18' },
+                        { name: '굽힘 S1', value: '88' },
+                        { name: '굽힘 S2', value: '92' }
+                    ]},
+                    { cardName: 'STAB/BAR MTG', partNumber: '54443-3M000, Hs60', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '105' },
+                        { name: '반경 P2', value: '105' },
+                        { name: '축 Q', value: '48' },
+                        { name: '비틀림 R', value: '14' },
+                        { name: '굽힘 S', value: '30' }
+                    ]},
+                    { cardName: 'INSULATOR', partNumber: '54610-EC700, Hs53', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '102' },
+                        { name: '반경 P2', value: '102' },
+                        { name: '축 Q', value: '102' },
+                        { name: '비틀림 R', value: '34' },
+                        { name: '굽힘 S', value: '34.0' }
+                    ]},
+                    { cardName: 'S/ABS LWR', partNumber: '54651-2J950, Hs55', status: 'HM C/O', params: [
+                        { name: '반경 P1', value: '1450' },
+                        { name: '반경 P2', value: '1450' },
+                        { name: '축 Q', value: '56.0' },
+                        { name: '비틀림 R', value: '35.0' },
+                        { name: '굽힘 S', value: '98.0' }
+                    ]},
+                    { cardName: 'SPRING', partNumber: '', status: '', params: [
+                        { name: 'UPPER, S0', value: '1, 2, 3' },
+                        { name: 'LOWER, S1', value: '4, 5, 6' },
+                        { name: 'STIFFNESS (kgf/mm)', value: '6.8' }
+                    ]},
+                    { cardName: 'BUMP STOPPER', partNumber: '', status: '', params: [
+                        { name: 'C~스토퍼', value: '26.500' },
+                        { name: 'B/HEIGHT', value: '15.500' },
+                        { name: 'Clearance', value: '14.200' }
+                    ]}
+                ]
+            },
+            {
+                id: 'v2.0',
+                name: 'v2.0 - 경량화 적용',
+                createdAt: '2025-01-25',
+                category: 'MECHA',
+                carType: 'ABC',
+                cards: [
+                    { cardName: 'UPR_ARM(FRT/RR)', partNumber: '54443-SW000, Hs60', status: 'RG3 C/O', params: [
+                        { name: '반경 P1', value: '435' },
+                        { name: '반경 P2', value: '435' },
+                        { name: '축 Q', value: '70' },
+                        { name: '비틀림 R', value: '18' },
+                        { name: '굽힘 S', value: '12' }
+                    ]},
+                    { cardName: 'LWR ARM, G', partNumber: '54443-SW000, Hs65', status: '신규', params: [
+                        { name: '반경 P1', value: '305' },
+                        { name: '반경 P2', value: '305' },
+                        { name: '축 Q', value: '65' },
+                        { name: '비틀림 R', value: '15' },
+                        { name: '굽힘 S1', value: '80' },
+                        { name: '굽힘 S2', value: '84' }
+                    ]},
+                    { cardName: 'LWR ARM, A', partNumber: '54551-SW000, Hs42', status: 'IK C/O', params: [
+                        { name: '반경 P1', value: '820' },
+                        { name: '반경 P2', value: '760' },
+                        { name: '축 Q', value: '32' },
+                        { name: '비틀림 R', value: '14' },
+                        { name: '굽힘 S1', value: '78' },
+                        { name: '굽힘 S2', value: '82' }
+                    ]},
+                    { cardName: 'SPRING', partNumber: '', status: '', params: [
+                        { name: 'UPPER, S0', value: '1, 2, 3' },
+                        { name: 'LOWER, S1', value: '4, 5, 6' },
+                        { name: 'STIFFNESS (kgf/mm)', value: '6.2' }
+                    ]}
+                ]
+            }
+        ];
+
+        // KPI 데이터베이스 (Performance > KPI List(소분류) > KPI Item 구조)
+        const kpiDatabase = {
+            rr_suspension: {
+                name: 'RR Suspension K&C',
+                kpiLists: [
+                    {
+                        name: 'Compliance',
+                        items: [
+                            { id: 'kpi_001', name: 'Lat Compliance Steer Coefficient', unit: 'deg/kN', base: '0.045' },
+                            { id: 'kpi_002', name: 'Lat Compliance Camber Coefficient', unit: 'deg/kN', base: '0.032' }
+                        ]
+                    },
+                    {
+                        name: 'Kinematics',
+                        items: [
+                            { id: 'kpi_003', name: 'Toe Change d/bump', unit: '°/mm', base: '-0.012' },
+                            { id: 'kpi_004', name: 'Camber Change d/bump', unit: '°/mm', base: '0.008' },
+                            { id: 'kpi_005', name: 'Roll Steer Coefficient', unit: '°/°', base: '0.15' }
+                        ]
+                    },
+                    {
+                        name: 'Stiffness',
+                        items: [
+                            { id: 'kpi_006', name: 'Lat Stiffness Rigid Tire Patch', unit: 'N/mm', base: '1250' }
+                        ]
+                    }
+                ]
+            },
+            fr_suspension: {
+                name: 'FR Suspension K&C',
+                kpiLists: [
+                    {
+                        name: 'Geometry',
+                        items: [
+                            { id: 'kpi_101', name: 'Caster Angle', unit: '°', base: '6.5' },
+                            { id: 'kpi_102', name: 'Kingpin Inclination', unit: '°', base: '13.2' },
+                            { id: 'kpi_103', name: 'Scrub Radius', unit: 'mm', base: '12' },
+                            { id: 'kpi_104', name: 'Mechanical Trail', unit: 'mm', base: '28' }
+                        ]
+                    },
+                    {
+                        name: 'Kinematics',
+                        items: [
+                            { id: 'kpi_105', name: 'Camber Change d/bump', unit: '°/mm', base: '0.006' }
+                        ]
+                    }
+                ]
+            },
+            handling: {
+                name: 'Handling',
+                kpiLists: [
+                    {
+                        name: 'Response',
+                        items: [
+                            { id: 'kpi_201', name: 'Steering Wheel Angle', unit: 'deg', target: '25.2±1.00', base: '28.0' },
+                            { id: 'kpi_202', name: 'Lateral Acceleration Response Time', unit: 'sec', target: '0.25±0.01', base: '0.266' }
+                        ]
+                    },
+                    {
+                        name: 'General Handling',
+                        items: [
+                            { id: 'kpi_203', name: 'Roll Angle Peak', unit: 'deg', target: '1.90±0.08', base: '1.80' },
+                            { id: 'kpi_204', name: 'Roll Angle Steady State', unit: 'deg', target: '1.70±0.08', base: '1.50' },
+                            { id: 'kpi_205', name: 'Yaw Rate Overshoot', unit: '%', target: '25.0±1.50', base: '28.15' }
+                        ]
+                    },
+                    {
+                        name: 'Limit Handling',
+                        items: [
+                            { id: 'kpi_206', name: 'Steady State Sideslip Angle', unit: 'deg', target: '0.60±0.02', base: '0.65' }
+                        ]
+                    }
+                ]
+            },
+            ride: {
+                name: 'Ride',
+                kpiLists: [
+                    {
+                        name: 'Vertical Motion',
+                        items: [
+                            { id: 'kpi_301', name: 'Vertical Acceleration (Front)', unit: 'm/s²', base: '1.2' },
+                            { id: 'kpi_302', name: 'Vertical Acceleration (Rear)', unit: 'm/s²', base: '1.4' }
+                        ]
+                    },
+                    {
+                        name: 'Pitch/Roll',
+                        items: [
+                            { id: 'kpi_303', name: 'Pitch Angle', unit: 'deg', base: '1.8' },
+                            { id: 'kpi_304', name: 'Suspension Travel', unit: 'mm', base: '85' }
+                        ]
+                    }
+                ]
+            },
+            nvh: {
+                name: 'NVH',
+                kpiLists: [
+                    {
+                        name: 'Noise',
+                        items: [
+                            { id: 'kpi_401', name: 'Interior Noise Level', unit: 'dB(A)', base: '42' }
+                        ]
+                    },
+                    {
+                        name: 'Vibration',
+                        items: [
+                            { id: 'kpi_402', name: 'Vibration (Steering)', unit: 'm/s²', base: '0.8' },
+                            { id: 'kpi_403', name: 'Vibration (Floor)', unit: 'm/s²', base: '0.5' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVersionList();
+            updateStats();
+        });
+
+        // 버전 목록 로드 (파라미터 DB에서 불러옴)
+        function loadVersionList() {
+            // 실제로는 localStorage나 API에서 가져옴
+            console.log('버전 목록 로드:', versionDatabase.length, '개');
+        }
+
+        // Performance 선택 시 KPI 불러오기
+        function loadKPIList() {
+            const performanceType = document.getElementById('performanceType').value;
+            
+            if (!performanceType) {
+                document.getElementById('kpiListContainer').innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                        </svg>
+                        <div class="empty-state-title">KPI List가 없습니다</div>
+                        <div class="empty-state-desc">먼저 Performance 유형을 선택해주세요</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 프로토타입: 항상 handling 데이터 표시
+            renderKPIList(kpiDatabase.handling);
+            updateStats();
+        }
+
+        // KPI 리스트 렌더링 (3단계 계층 구조)
+        function renderKPIList(kpiData) {
+            const container = document.getElementById('kpiListContainer');
+
+            let html = `
+                <div class="kpi-list">
+                    <div class="kpi-list-header">
+                        <div style="width: 140px;">KPI List (소분류)</div>
+                        <div style="flex: 1;">KPI Item</div>
+                        <div style="width: 80px; text-align: center;">Unit</div>
+                        <div style="width: 120px; text-align: center;">Target</div>
+                        <div style="width: 80px; text-align: center;">Base</div>
+                    </div>
+            `;
+
+            kpiData.kpiLists.forEach(kpiList => {
+                kpiList.items.forEach((item, itemIndex) => {
+                    html += `<div class="kpi-item">`;
+                    
+                    // KPI List (소분류)
+                    if (itemIndex === 0) {
+                        html += `<div class="kpi-category" style="width: 140px;">${kpiList.name}</div>`;
+                    } else {
+                        html += `<div style="width: 140px;"></div>`;
+                    }
+                    
+                    html += `<div class="kpi-name" style="flex: 1;">${item.name}</div>`;
+                    html += `<div class="kpi-unit" style="width: 80px;">${item.unit}</div>`;
+                    html += `<div class="kpi-target" style="width: 120px; text-align: center;">${item.target || '-'}</div>`;
+                    html += `<div class="kpi-base" style="width: 80px;">${item.base}</div>`;
+                    
+                    html += `</div>`;
+                });
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+            
+            // KPI 개수 업데이트
+            let totalKpis = 0;
+            kpiData.kpiLists.forEach(list => totalKpis += list.items.length);
+            document.getElementById('selectedKpiCount').textContent = totalKpis;
+        }
+
+        // Case 추가
+        function addCase() {
+            caseIdCounter++;
+            const caseId = caseIdCounter;
+
+            cases.push({
+                id: caseId,
+                versionId: null
+            });
+
+            renderCases();
+            updateStats();
+        }
+
+        // Case 렌더링
+        function renderCases() {
+            const container = document.getElementById('caseContainer');
+            
+            let html = '';
+            cases.forEach((caseItem, index) => {
+                // 버전 옵션 생성
+                let versionOptions = '<option value="">버전을 선택하세요</option>';
+                versionDatabase.forEach(version => {
+                    const selected = caseItem.versionId === version.id ? 'selected' : '';
+                    versionOptions += `<option value="${version.id}" ${selected}>${version.name}</option>`;
+                });
+
+                html += `
+                    <div class="case-card" id="case-${caseItem.id}">
+                        <div class="case-header">
+                            <div class="case-title">
+                                <span class="case-badge">Case ${index + 1}</span>
+                                버전 선택 & 파라미터 편집
+                            </div>
+                            <button class="btn btn-icon btn-secondary" onclick="removeCase(${caseItem.id})" title="삭제">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="case-body">
+                            <div class="version-select-wrapper">
+                                <label class="version-select-label">파라미터 DB 버전</label>
+                                <select class="version-select" id="version-select-${caseItem.id}" onchange="onVersionSelect(${caseItem.id}, this.value)">
+                                    ${versionOptions}
+                                </select>
+                            </div>
+                            <div class="param-preview" id="param-preview-${caseItem.id}">
+                                ${renderParamEditor(caseItem.id)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 버전 선택 시 처리
+        function onVersionSelect(caseId, versionId) {
+            const caseItem = cases.find(c => c.id === caseId);
+            if (caseItem) {
+                caseItem.versionId = versionId || null;
+                
+                // 버전의 파라미터 기본값 복사
+                if (versionId) {
+                    const version = versionDatabase.find(v => v.id === versionId);
+                    if (version) {
+                        caseItem.params = JSON.parse(JSON.stringify(version.cards)); // Deep copy
+                        caseItem.defaultParams = JSON.parse(JSON.stringify(version.cards)); // 기본값 저장
+                    }
+                } else {
+                    caseItem.params = [];
+                    caseItem.defaultParams = [];
+                }
+            }
+            
+            // 파라미터 편집 영역 업데이트
+            const previewContainer = document.getElementById(`param-preview-${caseId}`);
+            previewContainer.innerHTML = renderParamEditor(caseId);
+            
+            updateStats();
+        }
+
+        // 파라미터 편집기 렌더링
+        function renderParamEditor(caseId) {
+            const caseItem = cases.find(c => c.id === caseId);
+            
+            if (!caseItem || !caseItem.versionId) {
+                return `
+                    <div class="param-preview-header">
+                        <div class="param-preview-title">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                            </svg>
+                            파라미터 세트
+                        </div>
+                    </div>
+                    <div class="param-preview-empty">버전을 선택하면 파라미터를 편집할 수 있습니다</div>
+                `;
+            }
+
+            const cardCount = caseItem.params.length;
+            let modifiedCount = 0;
+            
+            // 변경된 파라미터 개수 계산
+            if (caseItem.params && caseItem.defaultParams) {
+                caseItem.params.forEach((card, cardIndex) => {
+                    card.params.forEach((param, paramIndex) => {
+                        if (caseItem.defaultParams[cardIndex] && 
+                            caseItem.defaultParams[cardIndex].params[paramIndex] &&
+                            param.value !== caseItem.defaultParams[cardIndex].params[paramIndex].value) {
+                            modifiedCount++;
+                        }
+                    });
+                });
+            }
+
+            let html = `
+                <div class="param-preview-header">
+                    <div class="param-preview-title">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                        </svg>
+                        파라미터 세트 (편집 가능)
+                        <span class="param-preview-count">${cardCount}개 카드</span>
+                        ${modifiedCount > 0 ? `<span class="param-preview-count" style="background: var(--progressive-blue);">${modifiedCount}개 수정됨</span>` : ''}
+                    </div>
+                    <button class="btn-reset" onclick="resetToDefault(${caseId})">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20" style="vertical-align: middle;">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                        </svg>
+                        기본값으로 초기화
+                    </button>
+                </div>
+            `;
+
+            caseItem.params.forEach((card, cardIndex) => {
+                // 해당 카드에 수정된 파라미터가 있는지 확인
+                let hasModified = false;
+                if (caseItem.defaultParams && caseItem.defaultParams[cardIndex]) {
+                    card.params.forEach((param, paramIndex) => {
+                        if (caseItem.defaultParams[cardIndex].params[paramIndex] &&
+                            param.value !== caseItem.defaultParams[cardIndex].params[paramIndex].value) {
+                            hasModified = true;
+                        }
+                    });
+                }
+
+                html += `
+                    <div class="param-card-editable">
+                        <div class="param-card-header" onclick="toggleCard(${caseId}, ${cardIndex})">
+                            <div>
+                                <div class="param-card-title">
+                                    ${card.cardName}
+                                    ${hasModified ? '<span style="color: var(--progressive-blue); font-size: 11px; margin-left: 8px;">● 수정됨</span>' : ''}
+                                </div>
+                                <div class="param-card-meta">
+                                    ${card.partNumber ? `<span class="param-card-part-number">${card.partNumber}</span>` : ''}
+                                    ${card.status ? `<span class="param-card-status">${card.status}</span>` : ''}
+                                </div>
+                            </div>
+                            <svg class="param-card-toggle" id="toggle-${caseId}-${cardIndex}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="param-card-body" id="body-${caseId}-${cardIndex}">
+                            <div class="param-grid">
+                `;
+                
+                card.params.forEach((param, paramIndex) => {
+                    const defaultValue = (caseItem.defaultParams && 
+                                         caseItem.defaultParams[cardIndex] && 
+                                         caseItem.defaultParams[cardIndex].params[paramIndex]) 
+                                         ? caseItem.defaultParams[cardIndex].params[paramIndex].value 
+                                         : param.value;
+                    const isModified = param.value !== defaultValue;
+                    
+                    html += `
+                        <div class="param-input-group">
+                            <label class="param-input-label">${param.name}</label>
+                            <input type="text" 
+                                class="param-input ${isModified ? 'modified' : ''}" 
+                                value="${param.value}"
+                                data-case-id="${caseId}"
+                                data-card-index="${cardIndex}"
+                                data-param-index="${paramIndex}"
+                                data-default="${defaultValue}"
+                                onchange="onParamChange(this)"
+                                oninput="checkParamModified(this)">
+                            <div class="param-input-default ${isModified ? '' : 'hidden'}">기본: ${defaultValue}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return html;
+        }
+
+        // 카드 접기/펼치기
+        function toggleCard(caseId, cardIndex) {
+            const body = document.getElementById(`body-${caseId}-${cardIndex}`);
+            const toggle = document.getElementById(`toggle-${caseId}-${cardIndex}`);
+            
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                toggle.classList.remove('collapsed');
+            } else {
+                body.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+            }
+        }
+
+        // 파라미터 값 변경 시 처리
+        function onParamChange(inputElement) {
+            const caseId = parseInt(inputElement.dataset.caseId);
+            const cardIndex = parseInt(inputElement.dataset.cardIndex);
+            const paramIndex = parseInt(inputElement.dataset.paramIndex);
+            const newValue = inputElement.value;
+            
+            const caseItem = cases.find(c => c.id === caseId);
+            if (caseItem && caseItem.params[cardIndex]) {
+                caseItem.params[cardIndex].params[paramIndex].value = newValue;
+            }
+            
+            checkParamModified(inputElement);
+        }
+
+        // 파라미터 수정 여부 체크 및 스타일 적용
+        function checkParamModified(inputElement) {
+            const defaultValue = inputElement.dataset.default;
+            const currentValue = inputElement.value;
+            const defaultLabel = inputElement.nextElementSibling;
+            
+            if (currentValue !== defaultValue) {
+                inputElement.classList.add('modified');
+                defaultLabel.classList.remove('hidden');
+            } else {
+                inputElement.classList.remove('modified');
+                defaultLabel.classList.add('hidden');
+            }
+        }
+
+        // 기본값으로 초기화
+        function resetToDefault(caseId) {
+            const caseItem = cases.find(c => c.id === caseId);
+            if (!caseItem || !caseItem.defaultParams) return;
+            
+            // 기본값으로 복원
+            caseItem.params = JSON.parse(JSON.stringify(caseItem.defaultParams));
+            
+            // UI 업데이트
+            const previewContainer = document.getElementById(`param-preview-${caseId}`);
+            previewContainer.innerHTML = renderParamEditor(caseId);
+        }
+
+        // 파라미터 미리보기 렌더링 (읽기 전용 - 기존 함수 대체)
+        function renderParamPreview(versionId) {
+            // 이제 사용하지 않음 - renderParamEditor로 대체
+            return '';
+        }
+
+        // Case 삭제
+        function removeCase(caseId) {
+            cases = cases.filter(c => c.id !== caseId);
+            renderCases();
+            updateStats();
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            const checkboxes = document.querySelectorAll('.kpi-checkbox:checked');
+            const selectedCount = checkboxes.length;
+            const caseCount = cases.length;
+            const validCaseCount = cases.filter(c => c.versionId).length;
+
+            document.getElementById('selectedKpiCount').textContent = selectedCount;
+            document.getElementById('footerCaseCount').textContent = caseCount;
+            document.getElementById('caseCount').textContent = caseCount + '개 Case';
+
+            // 실행 버튼 활성화 조건: Performance 선택 + KPI 1개 이상 + 버전이 선택된 Case 1개 이상
+            const performanceType = document.getElementById('performanceType').value;
+            const runBtn = document.getElementById('runBtn');
+            
+            if (performanceType && selectedCount > 0 && validCaseCount > 0) {
+                runBtn.disabled = false;
+            } else {
+                runBtn.disabled = true;
+            }
+        }
+
+        // 시뮬레이션 실행
+        function runSimulation() {
+            const overlay = document.getElementById('loadingOverlay');
+            const progressBar = document.getElementById('progressBar');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            overlay.classList.add('active');
+
+            const messages = [
+                '데이터를 준비하고 있습니다...',
+                '버전별 파라미터를 검증 중...',
+                'Case 데이터를 처리 중...',
+                '시뮬레이션 모델을 초기화 중...',
+                '시뮬레이션을 실행 중...',
+                '결과를 분석 중...',
+                '완료! 결과 페이지로 이동합니다.'
+            ];
+
+            let progress = 0;
+            let messageIndex = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+
+                if (progress > (messageIndex + 1) * (100 / messages.length)) {
+                    messageIndex = Math.min(messageIndex + 1, messages.length - 1);
+                    loadingMessage.textContent = messages[messageIndex];
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        saveSimulationResult();
+                        window.location.href = 'simulation-result.html';
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        // 시뮬레이션 결과 저장
+        function saveSimulationResult() {
+            const performanceType = document.getElementById('performanceType').value;
+            const performanceName = document.getElementById('performanceName').value;
+            const kpiData = kpiDatabase[performanceType];
+            
+            // 선택된 KPI 수집 (소분류 포함)
+            const selectedKPIData = [];
+            if (kpiData) {
+                kpiData.kpiLists.forEach(kpiList => {
+                    kpiList.items.forEach(item => {
+                        const checkbox = document.getElementById(`kpi-${item.id}`);
+                        const targetInput = document.getElementById(`target-${item.id}`);
+                        
+                        if (checkbox && checkbox.checked) {
+                            selectedKPIData.push({
+                                id: item.id,
+                                kpiList: kpiList.name,
+                                name: item.name,
+                                unit: item.unit,
+                                base: item.base,
+                                target: targetInput ? targetInput.value : ''
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Case별 버전 정보 및 변경된 파라미터 수집
+            const caseData = cases.filter(c => c.versionId).map((c, index) => {
+                const version = versionDatabase.find(v => v.id === c.versionId);
+                
+                // 변경된 파라미터만 추출
+                const modifiedParams = [];
+                if (c.params && c.defaultParams) {
+                    c.params.forEach((card, cardIndex) => {
+                        card.params.forEach((param, paramIndex) => {
+                            const defaultValue = c.defaultParams[cardIndex].params[paramIndex].value;
+                            if (param.value !== defaultValue) {
+                                modifiedParams.push({
+                                    cardName: card.cardName,
+                                    paramName: param.name,
+                                    defaultValue: defaultValue,
+                                    newValue: param.value
+                                });
+                            }
+                        });
+                    });
+                }
+                
+                return {
+                    caseNum: index + 1,
+                    versionId: c.versionId,
+                    versionName: version ? version.name : '',
+                    cards: c.params || [],
+                    modifiedParams: modifiedParams
+                };
+            });
+
+            const resultData = {
+                performanceType,
+                performanceName: performanceName || (kpiData ? kpiData.name : ''),
+                kpis: selectedKPIData,
+                cases: caseData,
+                executedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('simulationResult', JSON.stringify(resultData));
+        }
+
+        // Performance 라벨 가져오기
+        function getPerformanceLabel(type) {
+            const labels = {
+                rr_suspension: 'RR Suspension K&C',
+                fr_suspension: 'FR Suspension K&C',
+                handling: 'Handling (조종안정성)',
+                ride: 'Ride (승차감)',
+                nvh: 'NVH'
+            };
+            return labels[type] || type;
+        }
+
+        // 임시 저장
+        function saveDraft() {
+            alert('임시 저장되었습니다.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,3717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터 생성 - 현대자동차 R&D Parameter DB</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    <style>
+        /* ============================================
+           HYUNDAI DESIGN SYSTEM v1.1 (2020.11)
+        ============================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            /* Colors */
+            --hyundai-blue: #002c5f;
+            --white: #ffffff;
+            --black: #000000;
+            --hyundai-sand: #e4dcd3;
+            --hyundai-light-sand: #f6f3f2;
+            --grey-dark: #676767;
+            --grey-light: #cccccc;
+            --grey-disabled: #999999;
+            --progressive-blue: #00aad2;
+            --active-red: #e63312;
+            --grey-f9: #f9f9f9;
+            --grey-66: #666666;
+            --grey-33: #333333;
+            --success-green: #28a745;
+            --warning-yellow: #f9a825;
+            --card-header-bg: #e4dcd3;
+            
+            /* Typography */
+            --font-head: 'Noto Sans KR', sans-serif;
+            --font-text: 'Noto Sans KR', sans-serif;
+            --weight-light: 300;
+            --weight-regular: 400;
+            --weight-medium: 500;
+            --weight-bold: 700;
+            --font-size-h1: 40px;
+            --font-size-h2: 32px;
+            --font-size-h3: 24px;
+            --font-size-h4: 20px;
+            --font-size-body: 16px;
+            --font-size-small: 14px;
+            --font-size-caption: 13px;
+            --font-size-micro: 12px;
+            --font-size-tiny: 11px;
+            --line-height-heading: 150%;
+            --line-height-body: 150%;
+            --letter-spacing-default: 0;
+            --letter-spacing-korean: -0.025em;
+            
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-40: 40px;
+            --space-48: 48px;
+            --space-56: 56px;
+            --space-64: 64px;
+            
+            /* Layout */
+            --grid-columns: 12;
+            --grid-max-width: 1440px;
+            --grid-gutter: 20px;
+            
+            /* Components */
+            --btn-height: 46px;
+            --btn-min-width: 140px;
+            --btn-padding-x: 24px;
+            --btn-radius: 4px;
+            --input-height: 46px;
+            --input-padding-x: 16px;
+            --input-radius: 4px;
+            --card-radius: 6px;
+            --card-padding: 20px;
+            --badge-radius: 12px;
+            --badge-padding-x: 10px;
+            --badge-padding-y: 4px;
+            
+            /* Effects */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --shadow-sm: 0 2px 4px rgba(0, 44, 95, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 44, 95, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 44, 95, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-text);
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            letter-spacing: var(--letter-spacing-korean);
+            color: var(--black);
+            background: var(--hyundai-light-sand);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-head);
+            line-height: var(--line-height-heading);
+            font-weight: var(--weight-medium);
+        }
+
+        /* ============================================
+           LAYOUT STRUCTURE
+        ============================================ */
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Global Navigation */
+        .global-nav {
+            width: 240px;
+            background: var(--hyundai-blue);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            padding: var(--space-24);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-title {
+            font-size: var(--font-size-h4);
+            font-weight: var(--weight-medium);
+            color: var(--white);
+        }
+
+        .logo-subtitle {
+            font-size: var(--font-size-small);
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: var(--space-4);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: var(--space-16);
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-12) var(--space-16);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: var(--font-size-small);
+            border-radius: var(--btn-radius);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            margin-bottom: var(--space-8);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            background: var(--progressive-blue);
+            color: var(--white);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: var(--space-12);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Template Sidebar */
+        .template-sidebar {
+            width: 320px;
+            background: var(--white);
+            border-right: 1px solid var(--hyundai-sand);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition-normal);
+        }
+
+        .template-sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: var(--space-24);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .sidebar-title {
+            font-size: var(--font-size-h4);
+            color: var(--hyundai-blue);
+            font-weight: var(--weight-medium);
+            margin-bottom: var(--space-16);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            height: var(--input-height);
+            padding: 0 var(--space-48) 0 var(--input-padding-x);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border: 2px solid var(--hyundai-blue);
+            padding-left: calc(var(--input-padding-x) - 1px);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: var(--space-16);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--grey-dark);
+            pointer-events: none;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: var(--space-8);
+            margin-top: var(--space-16);
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: var(--space-4) var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-small);
+            background: transparent;
+            color: var(--grey-66);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .filter-tab:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .filter-tab.active {
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-color: var(--progressive-blue);
+        }
+
+        .template-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-16);
+        }
+
+        .template-item {
+            padding: var(--space-16);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--card-radius);
+            margin-bottom: var(--space-12);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .template-item:hover {
+            background: var(--hyundai-light-sand);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .template-item.selected {
+            border-color: var(--progressive-blue);
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        .template-item-title {
+            font-size: var(--font-size-body);
+            font-weight: var(--weight-medium);
+            color: var(--hyundai-blue);
+            margin-bottom: var(--space-4);
+        }
+
+        .template-item-meta {
+            font-size: var(--font-size-small);
+            color: var(--grey-dark);
+            display: flex;
+            gap: var(--space-12);
+            align-items: center;
+        }
+
+        .template-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-4);
+            font-size: var(--font-size-micro);
+        }
+
+        /* Work Area */
+        .work-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--white);
+            border-bottom: 1px solid var(--hyundai-sand);
+            padding: var(--space-16) var(--space-32);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .page-title-section {
+            display: flex;
+            align-items: center;
+            gap: var(--space-16);
+        }
+
+        .toggle-sidebar-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: var(--btn-height);
+            height: var(--btn-height);
+            border-radius: var(--btn-radius);
+            border: 1px solid var(--hyundai-sand);
+            background: var(--white);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            color: var(--grey-66);
+        }
+
+        .toggle-sidebar-btn:hover {
+            background: var(--hyundai-light-sand);
+            color: var(--hyundai-blue);
+        }
+
+        .page-title {
+            font-size: var(--font-size-h3);
+            color: var(--hyundai-blue);
+            font-weight: var(--weight-medium);
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-8) var(--space-16);
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-12);
+        }
+
+        .btn {
+            height: var(--btn-height);
+            min-width: var(--btn-min-width);
+            padding: 0 var(--btn-padding-x);
+            border-radius: var(--btn-radius);
+            font-family: var(--font-text);
+            font-size: var(--font-size-body);
+            font-weight: var(--weight-medium);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-8);
+        }
+
+        .btn-primary {
+            background: var(--hyundai-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: #003d7a;
+        }
+
+        .btn-secondary {
+            background: var(--progressive-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background: #008fb8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--grey-66);
+            border: 1px solid var(--hyundai-sand);
+        }
+
+        .btn-outline:hover {
+            background: var(--hyundai-light-sand);
+            border-color: var(--grey-light);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--white);
+            border-bottom: 1px solid var(--hyundai-sand);
+            padding: var(--space-12) var(--space-32);
+            display: flex;
+            gap: var(--space-32);
+            font-size: var(--font-size-small);
+            color: var(--grey-66);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .stat-value {
+            color: var(--progressive-blue);
+            font-weight: var(--weight-medium);
+        }
+
+        .stats-action-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-8) var(--space-16);
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--card-radius);
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+            color: var(--grey-66);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .stats-action-btn:hover {
+            background: var(--hyundai-light-sand);
+            border-color: var(--progressive-blue);
+            color: var(--hyundai-blue);
+        }
+
+        .stats-action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Card Grid Area */
+        .card-grid-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-32);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(580px, 1fr));
+            gap: var(--space-24);
+            max-width: var(--grid-max-width);
+            margin: 0 auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-64) var(--space-32);
+            color: var(--grey-dark);
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-24);
+            color: var(--grey-light);
+        }
+
+        .empty-title {
+            font-size: var(--font-size-h4);
+            color: var(--grey-66);
+            margin-bottom: var(--space-8);
+        }
+
+        .empty-text {
+            font-size: var(--font-size-body);
+            margin-bottom: var(--space-24);
+        }
+
+        .add-card-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-12);
+            padding: var(--space-20);
+            border: 2px dashed var(--progressive-blue);
+            border-radius: var(--card-radius);
+            background: transparent;
+            color: var(--progressive-blue);
+            font-size: var(--font-size-body);
+            font-weight: var(--weight-medium);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .add-card-btn:hover {
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        /* Parameter Card */
+        .param-card {
+            background: var(--white);
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: var(--transition-fast);
+        }
+
+        .param-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-8);
+            padding: var(--space-12);
+            background: var(--grey-f9);
+            border-bottom: 1px solid var(--hyundai-sand);
+        }
+
+        .card-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--btn-radius);
+            border: 1px solid var(--hyundai-sand);
+            background: var(--white);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            color: var(--grey-66);
+        }
+
+        .card-action-btn:hover {
+            background: var(--hyundai-light-sand);
+            color: var(--hyundai-blue);
+        }
+
+        .card-action-btn.delete:hover {
+            background: var(--active-red);
+            color: var(--white);
+            border-color: var(--active-red);
+        }
+
+        .card-header {
+            background: var(--card-header-bg);
+            padding: var(--space-16);
+            border-bottom: 2px solid rgba(0, 44, 95, 0.1);
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+            margin-bottom: var(--space-12);
+        }
+
+        .header-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .header-label {
+            font-size: var(--font-size-small);
+            font-weight: var(--weight-medium);
+            min-width: 60px;
+        }
+
+        .header-input {
+            flex: 1;
+            height: 36px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+        }
+
+        .header-select {
+            flex: 1;
+            height: 36px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+            background: var(--white);
+        }
+
+        .card-body {
+            padding: var(--space-16);
+        }
+
+        .param-rows {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-8);
+        }
+
+        .param-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 32px;
+            gap: var(--space-8);
+            align-items: center;
+        }
+
+        .param-name-input {
+            height: 36px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+        }
+
+        .param-value-input {
+            height: 36px;
+            padding: 0 var(--space-12);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+            background: var(--white);
+        }
+
+        .param-value-input:focus {
+            outline: none;
+            border: 2px solid var(--hyundai-blue);
+            padding-left: calc(var(--space-12) - 1px);
+        }
+
+        .param-autocomplete {
+            position: relative;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            box-shadow: var(--shadow-md);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: var(--space-8) var(--space-12);
+            cursor: pointer;
+            font-size: var(--font-size-body);
+            transition: var(--transition-fast);
+        }
+
+        .autocomplete-item:hover {
+            background: var(--hyundai-light-sand);
+        }
+
+        .remove-row-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--btn-radius);
+            border: 1px solid var(--hyundai-sand);
+            background: var(--white);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            color: var(--grey-66);
+        }
+
+        .remove-row-btn:hover {
+            background: var(--active-red);
+            color: var(--white);
+            border-color: var(--active-red);
+        }
+
+        /* ============================================
+           ONTOLOGY-BASED PARAMETER UI (Table Style)
+        ============================================ */
+        .ontology-table-wrapper {
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--card-radius);
+        }
+
+        .ontology-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--font-size-small);
+            table-layout: fixed;
+        }
+
+        .ontology-table thead th {
+            padding: 8px 4px;
+            text-align: center;
+            font-weight: var(--weight-medium);
+            font-size: 11px;
+            color: var(--grey-66);
+            border: 1px solid var(--hyundai-sand);
+            white-space: nowrap;
+        }
+
+        .ontology-table th.col-category {
+            background: #ffff00;
+            color: #000;
+            width: 22%;
+        }
+
+        .ontology-table th.col-subitem {
+            background: #fff9c4;
+            color: #000;
+            width: 28%;
+        }
+
+        .ontology-table th.col-type {
+            background: var(--hyundai-sand);
+            width: 8%;
+        }
+
+        .ontology-table th.col-value {
+            background: var(--hyundai-light-sand);
+            width: 12%;
+        }
+
+        .ontology-table th.col-action {
+            width: 40px;
+            background: var(--grey-f9);
+        }
+
+        .ontology-table tbody tr {
+            transition: var(--transition-fast);
+        }
+
+        .ontology-table tbody tr:hover {
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        .ontology-table td {
+            padding: 0;
+            border: 1px solid var(--hyundai-sand);
+            vertical-align: middle;
+            height: 38px;
+        }
+
+        .ontology-table td.cell-category {
+            background: #fffde7;
+        }
+
+        .ontology-table td.cell-subitem {
+            background: #fffef5;
+        }
+
+        .ontology-table td.cell-type {
+            background: var(--hyundai-light-sand);
+            text-align: center;
+            font-weight: var(--weight-medium);
+            color: var(--grey-66);
+            font-size: 12px;
+        }
+
+        .ontology-table td.cell-value {
+            background: var(--white);
+        }
+
+        .ontology-table td.cell-action {
+            background: var(--grey-f9);
+            text-align: center;
+        }
+
+        .ontology-select {
+            width: 100%;
+            height: 100%;
+            min-height: 38px;
+            padding: 0 4px;
+            border: none;
+            font-size: 12px;
+            background: transparent;
+            cursor: pointer;
+            text-overflow: ellipsis;
+        }
+
+        .ontology-select:focus {
+            outline: 2px solid var(--progressive-blue);
+            outline-offset: -2px;
+            background: var(--white);
+        }
+
+        .ontology-select:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .category-select {
+            font-weight: var(--weight-medium);
+        }
+
+        .ontology-value-input {
+            width: 100%;
+            height: 100%;
+            min-height: 38px;
+            padding: 0 4px;
+            border: none;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            text-align: right;
+            background: transparent;
+        }
+
+        .ontology-value-input:focus {
+            outline: 2px solid var(--hyundai-blue);
+            outline-offset: -2px;
+            background: var(--white);
+        }
+
+        .ontology-value-input:hover {
+            background: rgba(0, 44, 95, 0.03);
+        }
+
+        .ontology-value-input.single {
+            text-align: left;
+        }
+
+        .ontology-row-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: var(--grey-66);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ontology-row-btn:hover {
+            background: var(--active-red);
+            color: var(--white);
+        }
+
+        /* 파라미터 행 추가 버튼 */
+        .add-param-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-8);
+            width: 100%;
+            padding: var(--space-12);
+            border: 2px dashed var(--hyundai-sand);
+            border-radius: var(--card-radius);
+            background: transparent;
+            color: var(--grey-66);
+            font-size: var(--font-size-small);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            margin-top: var(--space-8);
+        }
+
+        .add-param-btn:hover {
+            border-color: var(--progressive-blue);
+            color: var(--progressive-blue);
+            background: rgba(0, 170, 210, 0.05);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: var(--space-24);
+            border-bottom: 1px solid var(--hyundai-sand);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: var(--font-size-h4);
+            color: var(--hyundai-blue);
+            font-weight: var(--weight-medium);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--btn-radius);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--grey-66);
+            transition: var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: var(--hyundai-light-sand);
+            color: var(--hyundai-blue);
+        }
+
+        .modal-body {
+            padding: var(--space-24);
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: var(--space-20);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--font-size-small);
+            color: var(--grey-66);
+            font-weight: var(--weight-medium);
+            margin-bottom: var(--space-8);
+        }
+
+        .form-input {
+            width: 100%;
+            height: var(--input-height);
+            padding: 0 var(--input-padding-x);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: var(--space-12) var(--input-padding-x);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--input-radius);
+            font-size: var(--font-size-body);
+            resize: vertical;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border: 2px solid var(--hyundai-blue);
+            padding-left: calc(var(--input-padding-x) - 1px);
+        }
+
+        .modal-footer {
+            padding: var(--space-24);
+            border-top: 1px solid var(--hyundai-sand);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-12);
+        }
+
+        /* AI Assistant Styles */
+        .ai-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .ai-modal-overlay.show {
+            display: flex;
+        }
+
+        .ai-modal {
+            background: var(--white);
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-upload-area {
+            border: 2px dashed var(--progressive-blue);
+            border-radius: var(--card-radius);
+            padding: var(--space-32);
+            text-align: center;
+            background: var(--hyundai-light-sand);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .ai-upload-area:hover {
+            background: var(--hyundai-sand);
+        }
+
+        .ai-upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto var(--space-16);
+            color: var(--progressive-blue);
+        }
+
+        .ai-file-types {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-16);
+            margin-top: var(--space-16);
+            font-size: var(--font-size-small);
+        }
+
+        .ai-file-types-left {
+            display: flex;
+            gap: var(--space-16);
+        }
+
+        .ai-file-type {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-8) var(--space-12);
+            background: var(--white);
+            border-radius: var(--card-radius);
+        }
+
+        .ai-file-type.recommended {
+            border: 2px solid var(--success-green);
+        }
+
+        .ai-tabs-caption {
+            display: flex;
+            gap: var(--space-8);
+            font-size: var(--font-size-micro);
+            color: var(--grey-dark);
+        }
+
+        .ai-tab-caption {
+            padding: 4px 12px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .ai-tab-caption:hover {
+            border-color: var(--hyundai-sand);
+        }
+
+        .ai-tab-caption.active {
+            background: var(--progressive-blue);
+            color: var(--white);
+            border-color: var(--progressive-blue);
+        }
+
+        .ai-tips {
+            margin-top: var(--space-16);
+            padding: var(--space-16);
+            background: var(--white);
+            border-radius: var(--card-radius);
+            border-left: 4px solid var(--progressive-blue);
+        }
+
+        .ai-tips ul {
+            margin-top: var(--space-8);
+            margin-left: var(--space-20);
+            font-size: var(--font-size-small);
+            color: var(--grey-66);
+        }
+
+        .ai-tips li {
+            margin-bottom: var(--space-4);
+        }
+
+        .ai-loading {
+            text-align: center;
+            padding: var(--space-32);
+        }
+
+        .ai-spinner {
+            border: 4px solid var(--hyundai-sand);
+            border-top: 4px solid var(--progressive-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-16);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ai-results {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--space-16);
+            max-height: 500px;
+        }
+
+        .ai-chat {
+            background: var(--hyundai-light-sand);
+            border-radius: var(--card-radius);
+            padding: var(--space-16);
+            overflow-y: auto;
+        }
+
+        .ai-message {
+            background: var(--white);
+            padding: var(--space-12);
+            border-radius: var(--card-radius);
+            margin-bottom: var(--space-12);
+            font-size: var(--font-size-small);
+        }
+
+        .ai-cards-preview {
+            overflow-y: auto;
+        }
+
+        .ai-card-item {
+            background: var(--white);
+            border: 1px solid var(--hyundai-sand);
+            border-radius: var(--card-radius);
+            padding: var(--space-12);
+            margin-bottom: var(--space-12);
+        }
+
+        .ai-card-header {
+            background: var(--card-header-bg);
+            padding: var(--space-8);
+            border-radius: var(--card-radius);
+            margin-bottom: var(--space-8);
+            font-weight: var(--weight-medium);
+            font-size: var(--font-size-small);
+        }
+
+        .ai-param {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-4);
+            font-size: var(--font-size-small);
+        }
+
+        .paste-tab {
+            padding: var(--space-12) var(--space-24);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: var(--font-size-body);
+            font-weight: var(--weight-medium);
+            color: var(--grey-66);
+            transition: var(--transition-fast);
+        }
+
+        .paste-tab:hover {
+            color: var(--hyundai-blue);
+        }
+
+        .paste-tab.active {
+            color: var(--progressive-blue);
+            border-bottom-color: var(--progressive-blue);
+        }
+
+        .paste-area {
+            min-height: 300px;
+            padding: var(--space-16);
+            border: 2px dashed var(--progressive-blue);
+            border-radius: var(--card-radius);
+            background: var(--white);
+            font-family: 'Courier New', monospace;
+            font-size: var(--font-size-small);
+            overflow: auto;
+            cursor: text;
+        }
+
+        .paste-area:empty:before {
+            content: attr(placeholder);
+            color: var(--grey-light);
+        }
+
+        .paste-area:focus {
+            outline: none;
+            border-color: var(--hyundai-blue);
+            background: var(--hyundai-light-sand);
+        }
+
+        /* Responsive */
+        @media (max-width: 1440px) {
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .template-sidebar {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .global-nav {
+                width: 80px;
+            }
+
+            .logo-subtitle,
+            .nav-item span {
+                display: none;
+            }
+
+            .template-sidebar {
+                position: absolute;
+                left: 80px;
+                height: 100%;
+                z-index: 100;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: var(--space-16);
+            }
+
+            .page-title {
+                font-size: var(--font-size-h4);
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    
+        /* 통일된 네비게이션 스타일 */
+        .nav-button-area {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+        }
+
+        .nav-btn-primary {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #00aad2;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .nav-btn-primary:hover {
+            background: #0099bb;
+        }
+
+        .nav-btn-primary.active {
+            background: #00aad2;
+            box-shadow: 0 0 0 3px rgba(0, 170, 210, 0.2);
+        }
+
+        .global-nav {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Navigation -->
+        <div class="global-nav">
+            <div class="logo-area">
+                <div class="logo-title">R&D Parameter DB</div>
+                <div class="logo-subtitle">현대자동차</div>
+            </div>
+            <div class="nav-menu">
+    <div class="nav-item" onclick="location.href='index.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        데이터조회
+    </div>
+    <div class="nav-item active" onclick="location.href='create-step1.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        데이터 생성
+    </div>
+    <div class="nav-item" onclick="location.href='kpi-analysis.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        해석
+    </div>
+    <div class="nav-item" onclick="location.href='simulation-setup.html'">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+        </svg>
+        시뮬레이션
+    </div>
+</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Template Sidebar -->
+            <div class="template-sidebar" id="templateSidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">저장된 버전</h3>
+                    <div class="search-box">
+                        <input type="text" class="search-input" placeholder="버전 검색..." id="templateSearch">
+                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-category="all">전체</button>
+                        <button class="filter-tab" data-category="NE1">NE1</button>
+                        <button class="filter-tab" data-category="GN7">GN7</button>
+                        <button class="filter-tab" data-category="차체">차체</button>
+                        <button class="filter-tab" data-category="전기전자">전기전자</button>
+                    </div>
+                </div>
+                <div class="template-list" id="templateList">
+                    <!-- Templates will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Work Area -->
+            <div class="work-area">
+                <!-- Top Bar -->
+                <div class="top-bar">
+                    <div class="page-title-section">
+                        <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                        <h1 class="page-title">데이터 생성</h1>
+                        <div class="step-indicator">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            STEP 1/2
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" onclick="clearAll()">전체 초기화</button>
+                        <button class="btn btn-outline" onclick="openLoadModal()">템플릿 불러오기</button>
+                        <button class="btn btn-secondary" onclick="openSaveModal()">템플릿 저장</button>
+                        <button class="btn btn-primary" onclick="goToNextStep()">다음: 모델 & 카드 연결</button>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="stats-bar" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: var(--space-24);">
+                        <div class="stat-item">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                            </svg>
+                            <span>카드: <span class="stat-value" id="cardCount">0</span></span>
+                        </div>
+                        <div class="stat-item">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>총 파라미터: <span class="stat-value" id="paramCount">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--space-8);">
+                        <button class="stats-action-btn" onclick="addCard()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                            </svg>
+                            카드 추가하기
+                        </button>
+                        <button class="stats-action-btn" onclick="openAIModal()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                            </svg>
+                            파일 업로드
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card Grid Area -->
+                <div class="card-grid-area">
+                    <div class="card-grid" id="cardGrid">
+                        <!-- Empty State -->
+                        <div class="empty-state" id="emptyState">
+                            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <div class="empty-title">카드가 없습니다</div>
+                            <div class="empty-text">상단 버튼으로 새 카드를 추가하거나 파일을 업로드하세요</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Template Modal -->
+    <div class="modal-overlay" id="saveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">템플릿 저장</h3>
+                <button class="modal-close" onclick="closeSaveModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">템플릿 이름 *</label>
+                    <input type="text" class="form-input" id="templateName" placeholder="예: NE1 FR Suspension v1.0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">설명</label>
+                    <textarea class="form-textarea" id="templateDescription" placeholder="템플릿 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">카테고리</label>
+                    <select class="form-input" id="templateCategory">
+                        <option value="NE1">NE1</option>
+                        <option value="GN7">GN7</option>
+                        <option value="OS">OS</option>
+                        <option value="기타">기타</option>
+                        <option value="차체">차체</option>
+                        <option value="NVH">NVH</option>
+                        <option value="열관리">열관리</option>
+                        <option value="전기전자">전기전자</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">공유 설정</label>
+                    <select class="form-input" id="templateSharing">
+                        <option value="private">개인용</option>
+                        <option value="team">팀 공유</option>
+                        <option value="organization">조직 공유</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">저장 옵션</label>
+                    <select class="form-input" id="templateSaveOption">
+                        <option value="structure">구조만 저장 (파라미터명만)</option>
+                        <option value="withValues">값 포함 저장 (파라미터명 + 값)</option>
+                    </select>
+                    <p style="font-size: var(--font-size-small); color: var(--grey-dark); margin-top: var(--space-8);">
+                        구조만 저장하면 재사용 시 값을 새로 입력해야 합니다.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSaveModal()">취소</button>
+                <button class="btn btn-primary" onclick="saveTemplate()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Template Modal -->
+    <div class="modal-overlay" id="loadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">템플릿 불러오기</h3>
+                <button class="modal-close" onclick="closeLoadModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">불러오기 방식</label>
+                    <select class="form-input" id="loadOption">
+                        <option value="replace">새로 시작 (현재 작업 내용 삭제)</option>
+                        <option value="append">추가로 불러오기 (현재 카드에 추가)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">값 불러오기 옵션</label>
+                    <select class="form-input" id="loadValueOption">
+                        <option value="structure">구조만 불러오기 (파라미터명만)</option>
+                        <option value="withValues">값 포함 불러오기 (저장된 값 포함)</option>
+                    </select>
+                    <p style="font-size: var(--font-size-small); color: var(--grey-dark); margin-top: var(--space-8);">
+                        템플릿에 값이 저장되어 있지 않으면 구조만 불러옵니다.
+                    </p>
+                </div>
+                <div id="templatePreview" style="margin-top: var(--space-20); padding: var(--space-16); background: var(--hyundai-light-sand); border-radius: var(--card-radius);">
+                    <p style="color: var(--grey-dark); font-size: var(--font-size-small);">좌측 템플릿 목록에서 템플릿을 선택하세요</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeLoadModal()">취소</button>
+                <button class="btn btn-primary" onclick="loadTemplate()" id="loadBtn" disabled>불러오기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // DATA & STATE MANAGEMENT
+        // ============================================
+
+        let cardIdCounter = 0;
+        let cards = [];
+        let selectedTemplateId = null;
+
+        // Parameter presets
+        const parameterPresets = [
+            '반경 P1',
+            '반경 P2',
+            '축 Q',
+            '비틀림 R',
+            '굽힘 S1',
+            '굽힘 S2',
+            '길이 L',
+            '폭 W',
+            '높이 H',
+            '두께 T',
+            '직경 D',
+            '각도 A'
+        ];
+
+        // ============================================
+        // ONTOLOGY DATABASE (Mock)
+        // ============================================
+        const ontologyDB = {
+            "HARD POINT": {
+                hasType: true,  // A, B, G 등 타입 컬럼 있음
+                columns: ["T", "L", "H"],
+                children: {
+                    "LWR_ARM, BODY": { type: "A" },
+                    "LATERAL_ARM, KUNC": { type: "B" },
+                    "COMP_ARM, BODY": { type: "G" },
+                    "TIE_ROD, INR": { type: "T" },
+                    "TIRE_ROD, OTR": { type: "H" },
+                    "UPR_ARM_FRT, BODY": { type: "Cf" },
+                    "UPR_ARM, KUNC": { type: "Cf" },
+                    "UPR_ARM_RR_BODY": { type: "Cr" },
+                    "WHL_CTR": { type: "E" }
+                }
+            },
+            "SPRING": {
+                columns: ["1", "2", "3"],
+                children: {
+                    "UPPER, S0": {},
+                    "LOWER, S1": {},
+                    "STIFFNESS (kgf/mm)": { singleValue: true }
+                }
+            },
+            "S/ABS": {
+                columns: ["1", "2", "3"],
+                children: {
+                    "UPR, X0": {},
+                    "LWR, X1": {}
+                }
+            },
+            "BUMP STOPPER": {
+                children: {
+                    "SIZE": { singleValue: true, placeholder: "외경Ø74 X 내경19.5 X 높이 52.2" },
+                    "재질": { singleValue: true, placeholder: "MH24-60" },
+                    "C~스토퍼": { singleValue: true },
+                    "B/HEIGHT": { singleValue: true },
+                    "Clearance": { singleValue: true }
+                }
+            },
+            "STAB. BAR": {
+                columns: ["T", "L", "H"],
+                children: {
+                    "X/MBR MTG": {},
+                    "S/ABS": {},
+                    "EYE PT": {},
+                    "DIA. (mm)": { singleValue: true, placeholder: "중공 Φ 25.0x4.5t" }
+                }
+            },
+            "SUBFRAME MTG": {
+                columns: ["T", "L", "H"],
+                children: {
+                    "FRT": {},
+                    "CENTER": {},
+                    "REAR 1": {},
+                    "REAR 2": {}
+                }
+            },
+            "DRIVE SHAFT": {
+                children: {
+                    "Wheel Bearing": {
+                        isCategory: true,
+                        children: {
+                            "OBJ~W/CTR": { columns: ["값1", "값2"] },
+                            "OBJ": { columns: ["T", "L", "H"] },
+                            "IBJ LH": { columns: ["T", "L", "H"] },
+                            "LBJ RH": { columns: ["T", "L", "H"] },
+                            "Length": { columns: ["T", "L"] }
+                        }
+                    },
+                    "DIFF, CTR": { columns: ["T", "L", "H"] }
+                }
+            },
+            "Initial Values": {
+                children: {
+                    "Initial TOE (deg)": { columns: ["값", "공차"] },
+                    "Initial CAMBER (deg)": { columns: ["값", "공차"] },
+                    "Tire Loaded Radius (mm)": { singleValue: true },
+                    "Wheel Stroke (mm)": { columns: ["min", "max"] },
+                    "Rack Stroke (mm)": { singleValue: true },
+                    "Ride Height (mm)": { singleValue: true }
+                }
+            }
+        };
+
+        // 온톨로지에서 대분류 목록 가져오기
+        function getOntologyCategories() {
+            return Object.keys(ontologyDB);
+        }
+
+        // 특정 카테고리의 하위 항목 가져오기
+        function getOntologyChildren(category) {
+            if (ontologyDB[category] && ontologyDB[category].children) {
+                return Object.keys(ontologyDB[category].children);
+            }
+            return [];
+        }
+
+        // 특정 경로의 온톨로지 정보 가져오기
+        function getOntologyInfo(path) {
+            let current = ontologyDB;
+            for (const key of path) {
+                if (current[key]) {
+                    current = current[key];
+                } else if (current.children && current.children[key]) {
+                    current = current.children[key];
+                } else {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        // 컬럼 정보 가져오기
+        function getColumns(category, child) {
+            const catInfo = ontologyDB[category];
+            if (!catInfo) return null;
+            
+            // 자식 항목의 컬럼 우선
+            if (catInfo.children && catInfo.children[child]) {
+                const childInfo = catInfo.children[child];
+                if (childInfo.columns) return childInfo.columns;
+                if (childInfo.singleValue) return null;
+            }
+            
+            // 부모 카테고리의 기본 컬럼
+            return catInfo.columns || null;
+        }
+
+        // Mock templates data
+        const mockTemplates = [
+            {
+                id: 1,
+                name: 'NE1 FR Suspension v1.0',
+                description: '1차 셋업 (2024.03) - 초기 설계 검증용',
+                category: 'NE1',
+                cardCount: 8,
+                paramCount: 45,
+                sharing: 'team',
+                version: 'v1.0',
+                createdAt: '2024-03-15',
+                cards: [
+                    {
+                        partName: 'HARD POINT (LH)',
+                        status: '기존',
+                        partNumber: '00 (코멘트 60)',
+                        params: [
+                            { category: 'HARD POINT', subItem: 'LWR_ARM, BODY', values: { T: '-200.000', L: '390.000', H: '-81.000' } },
+                            { category: 'HARD POINT', subItem: 'LATERAL_ARM, KUNC', values: { T: '-201.000', L: '391.000', H: '-82.000' } }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                name: 'NE1 FR Suspension v2.0',
+                description: '2차 양산 (2024.06) - 양산 승인 버전',
+                category: 'NE1',
+                cardCount: 8,
+                paramCount: 52,
+                sharing: 'organization',
+                version: 'v2.0',
+                createdAt: '2024-06-20',
+                cards: []
+            },
+            {
+                id: 3,
+                name: 'NE1 RR Suspension v1.0',
+                description: '후륜 서스펜션 1차 셋업',
+                category: 'NE1',
+                cardCount: 6,
+                paramCount: 38,
+                sharing: 'team',
+                version: 'v1.0',
+                createdAt: '2024-04-10',
+                cards: []
+            },
+            {
+                id: 4,
+                name: 'GN7 FR Suspension v1.0',
+                description: 'GN7 전륜 초기 설계',
+                category: 'GN7',
+                cardCount: 7,
+                paramCount: 41,
+                sharing: 'private',
+                version: 'v1.0',
+                createdAt: '2024-05-01',
+                cards: []
+            }
+        ];
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMockTemplates();
+            updateStats();
+            setupFilterTabs();
+        });
+
+        function loadMockTemplates() {
+            const templateList = document.getElementById('templateList');
+            templateList.innerHTML = '';
+
+            mockTemplates.forEach(template => {
+                const item = document.createElement('div');
+                item.className = 'template-item';
+                item.onclick = () => selectTemplate(template.id);
+                
+                const sharingIcon = template.sharing === 'team' 
+                    ? '<svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>'
+                    : template.sharing === 'organization' 
+                    ? '<svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/></svg>'
+                    : '<svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>';
+                
+                const sharingText = template.sharing === 'team' ? '팀 공유' : template.sharing === 'organization' ? '조직 공유' : '개인';
+                
+                item.innerHTML = `
+                    <div class="template-item-title">${template.name}</div>
+                    <div style="font-size: 11px; color: var(--grey-66); margin-bottom: 8px;">${template.description}</div>
+                    <div class="template-item-meta">
+                        <span class="template-badge" style="background: var(--progressive-blue); color: white;">${template.version || 'v1.0'}</span>
+                        <span class="template-badge">${template.category}</span>
+                        <span class="template-badge">${sharingIcon} ${sharingText}</span>
+                    </div>
+                    <div class="template-item-meta" style="margin-top: 4px;">
+                        <span class="template-badge">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                            </svg>
+                            ${template.cardCount}개 세트
+                        </span>
+                        <span class="template-badge">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            ${template.paramCount}개 파라미터
+                        </span>
+                        <span class="template-badge">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            ${template.createdAt || '2024-01'}
+                        </span>
+                    </div>
+                `;
+                
+                templateList.appendChild(item);
+            });
+        }
+
+        function setupFilterTabs() {
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    // Filter logic here
+                });
+            });
+        }
+
+        // ============================================
+        // CARD MANAGEMENT
+        // ============================================
+
+        function addCard() {
+            const cardId = ++cardIdCounter;
+            const card = {
+                id: cardId,
+                partName: '',
+                status: '신규',
+                partNumber: '',
+                params: [],
+                values: []
+            };
+            
+            cards.push(card);
+            renderCard(card);
+            updateStats();
+            
+            // Hide empty state, show add button
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function renderCard(card) {
+            const cardGrid = document.getElementById('cardGrid');
+            const cardElement = document.createElement('div');
+            cardElement.className = 'param-card';
+            cardElement.id = `card-${card.id}`;
+            
+            cardElement.innerHTML = `
+                <div class="card-actions">
+                    <button class="card-action-btn" onclick="duplicateCard(${card.id})" title="복제">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z"/>
+                            <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z"/>
+                        </svg>
+                    </button>
+                    <button class="card-action-btn delete" onclick="deleteCard(${card.id})" title="삭제">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-header">
+                    <div class="header-row">
+                        <span class="header-label">부품명</span>
+                        <input type="text" class="header-input" value="${card.partName}" 
+                               onchange="updateCardData(${card.id}, 'partName', this.value)">
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">상태</span>
+                        <select class="header-select" onchange="updateCardData(${card.id}, 'status', this.value)">
+                            <option value="신규" ${card.status === '신규' ? 'selected' : ''}>신규</option>
+                            <option value="기존" ${card.status === '기존' ? 'selected' : ''}>기존</option>
+                        </select>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">부품번호</span>
+                        <input type="text" class="header-input" value="${card.partNumber}"
+                               onchange="updateCardData(${card.id}, 'partNumber', this.value)">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="param-rows" id="params-${card.id}">
+                        ${renderParams(card)}
+                    </div>
+                    <button class="add-param-btn" onclick="addParam(${card.id})">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        파라미터 행 추가
+                    </button>
+                </div>
+            `;
+            
+            // Append to card grid
+            cardGrid.appendChild(cardElement);
+        }
+
+        function renderParams(card) {
+            if (card.params.length === 0) {
+                return '<p style="color: var(--grey-dark); font-size: var(--font-size-small); text-align: center; padding: var(--space-16);">파라미터를 추가하세요</p>';
+            }
+            
+            // 온톨로지 객체 형태인지 확인
+            const hasOntologyParams = card.params.some(p => typeof p === 'object' && p !== null);
+            
+            if (hasOntologyParams) {
+                return renderOntologyTable(card);
+            }
+            
+            // 기존 문자열 형태의 param (하위 호환)
+            return card.params.map((param, index) => {
+                const value = card.values[index] || '';
+                const isMultiValue = value.includes(',');
+                
+                return `
+                <div class="param-row">
+                    <div class="param-autocomplete">
+                        <input type="text" class="param-name-input" value="${param}" 
+                               placeholder="파라미터명"
+                               onfocus="showAutocomplete(this, ${card.id}, ${index})"
+                               onblur="hideAutocomplete(this)"
+                               oninput="filterAutocomplete(this, ${card.id}, ${index})"
+                               onchange="updateParam(${card.id}, ${index}, this.value)">
+                        <div class="autocomplete-dropdown" id="autocomplete-${card.id}-${index}">
+                            ${parameterPresets.map(preset => `
+                                <div class="autocomplete-item" onmousedown="selectPreset(${card.id}, ${index}, '${preset}')">${preset}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div style="flex: 1; position: relative;">
+                        <input type="text" class="param-value-input" placeholder="값 입력 (다중값은 콤마로 구분)" 
+                               value="${value}"
+                               onchange="updateParamValue(${card.id}, ${index}, this.value)">
+                        ${isMultiValue ? `<div style="font-size: var(--font-size-micro); color: var(--progressive-blue); margin-top: 2px;">표시: ${value.split(',').map(v => v.trim()).join(' | ')}</div>` : ''}
+                    </div>
+                    <button class="remove-row-btn" onclick="removeParam(${card.id}, ${index})">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // 온톨로지 테이블 렌더링
+        function renderOntologyTable(card) {
+            // 모든 파라미터에서 사용되는 컬럼 수집
+            let maxColumns = [];
+            card.params.forEach(param => {
+                if (typeof param === 'object' && param !== null) {
+                    const cols = getParamColumns(param);
+                    if (cols && cols.length > maxColumns.length) {
+                        maxColumns = cols;
+                    }
+                }
+            });
+            
+            // 기본 컬럼이 없으면 기본값 사용
+            if (maxColumns.length === 0) {
+                maxColumns = ['T', 'L', 'H'];
+            }
+            
+            return `
+                <div class="ontology-table-wrapper">
+                    <table class="ontology-table">
+                        <thead>
+                            <tr>
+                                <th class="col-category">대분류</th>
+                                <th class="col-subitem">항목</th>
+                                <th class="col-type">Type</th>
+                                ${maxColumns.map(col => `<th class="col-value">${col}</th>`).join('')}
+                                <th class="col-action"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${card.params.map((param, index) => renderOntologyRow(card, index, param, maxColumns)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // 파라미터의 컬럼 정보 가져오기
+        function getParamColumns(param) {
+            const category = param.category || '';
+            const subItem = param.subItem || '';
+            const subItem2 = param.subItem2 || '';
+            
+            const catInfo = category ? ontologyDB[category] : null;
+            const childInfo = catInfo && catInfo.children && subItem ? catInfo.children[subItem] : null;
+            
+            // 3단계 하위 항목 확인
+            const hasLevel3 = childInfo && childInfo.isCategory && childInfo.children;
+            const level3Info = hasLevel3 && subItem2 ? childInfo.children[subItem2] : null;
+            
+            if (level3Info && level3Info.columns) return level3Info.columns;
+            if (childInfo && childInfo.columns) return childInfo.columns;
+            if (catInfo && catInfo.columns) return catInfo.columns;
+            
+            return null;
+        }
+
+        // 온톨로지 테이블 행 렌더링
+        function renderOntologyRow(card, index, param, maxColumns) {
+            if (typeof param !== 'object' || param === null) {
+                // 기존 문자열 형태면 변환
+                param = { category: '', subItem: '', subItem2: '', values: {} };
+            }
+            
+            const category = param.category || '';
+            const subItem = param.subItem || '';
+            const subItem2 = param.subItem2 || '';
+            const values = param.values || {};
+            
+            const categories = getOntologyCategories();
+            const children = category ? getOntologyChildren(category) : [];
+            const catInfo = category ? ontologyDB[category] : null;
+            const childInfo = catInfo && catInfo.children && subItem ? catInfo.children[subItem] : null;
+            
+            // 타입 값 (A, B, G 등)
+            const hasType = catInfo && catInfo.hasType;
+            const typeValue = childInfo && childInfo.type ? childInfo.type : '';
+            
+            // 3단계 하위 항목
+            const hasLevel3 = childInfo && childInfo.isCategory && childInfo.children;
+            const level3Children = hasLevel3 ? Object.keys(childInfo.children) : [];
+            const level3Info = hasLevel3 && subItem2 ? childInfo.children[subItem2] : null;
+            
+            // 현재 행의 컬럼
+            const currentColumns = getParamColumns(param) || maxColumns;
+            const isSingleValue = (childInfo && childInfo.singleValue) || (level3Info && level3Info.singleValue);
+            const placeholder = (childInfo && childInfo.placeholder) || (level3Info && level3Info.placeholder) || '';
+            
+            // 값 입력 가능 여부
+            const canInputValues = (subItem && !hasLevel3) || (hasLevel3 && subItem2);
+            
+            return `
+                <tr class="ontology-row" data-index="${index}">
+                    <!-- 대분류 -->
+                    <td class="cell-category">
+                        <select class="ontology-select category-select" 
+                                onchange="onCategoryChange(${card.id}, ${index}, this.value)">
+                            <option value="">선택</option>
+                            ${categories.map(cat => `
+                                <option value="${cat}" ${cat === category ? 'selected' : ''}>${cat}</option>
+                            `).join('')}
+                        </select>
+                    </td>
+                    
+                    <!-- 항목 -->
+                    <td class="cell-subitem">
+                        ${category && children.length > 0 ? `
+                            <select class="ontology-select subitem-select"
+                                    onchange="onSubItemChange(${card.id}, ${index}, this.value)">
+                                <option value="">선택</option>
+                                ${children.map(child => `
+                                    <option value="${child}" ${child === subItem ? 'selected' : ''}>${child}</option>
+                                `).join('')}
+                            </select>
+                        ` : hasLevel3 ? `
+                            <select class="ontology-select subitem2-select"
+                                    onchange="onSubItem2Change(${card.id}, ${index}, this.value)">
+                                <option value="">선택</option>
+                                ${level3Children.map(child => `
+                                    <option value="${child}" ${child === subItem2 ? 'selected' : ''}>${child}</option>
+                                `).join('')}
+                            </select>
+                        ` : ''}
+                    </td>
+                    
+                    <!-- Type -->
+                    <td class="cell-type">${typeValue}</td>
+                    
+                    <!-- 값 컬럼들 -->
+                    ${canInputValues && isSingleValue ? `
+                        <td colspan="${maxColumns.length}">
+                            <input type="text" class="ontology-value-input single" 
+                                   placeholder="${placeholder || '값 입력'}"
+                                   value="${values.single || ''}"
+                                   onchange="onOntologyValueChange(${card.id}, ${index}, 'single', this.value)">
+                        </td>
+                    ` : maxColumns.map(col => `
+                        <td class="cell-value">
+                            ${canInputValues ? `
+                                <input type="text" class="ontology-value-input" 
+                                       value="${values[col] || ''}"
+                                       onchange="onOntologyValueChange(${card.id}, ${index}, '${col}', this.value)">
+                            ` : ''}
+                        </td>
+                    `).join('')}
+                    
+                    <!-- 삭제 버튼 -->
+                    <td class="cell-action">
+                        <button class="ontology-row-btn" onclick="removeParam(${card.id}, ${index})" title="삭제">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // 온톨로지 기반 파라미터 행 렌더링
+        function renderOntologyParam(card, index, param) {
+            const category = param.category || '';
+            const subItem = param.subItem || '';
+            const subItem2 = param.subItem2 || '';
+            const values = param.values || {};
+            
+            const categories = getOntologyCategories();
+            const children = category ? getOntologyChildren(category) : [];
+            const catInfo = category ? ontologyDB[category] : null;
+            const childInfo = catInfo && catInfo.children && subItem ? catInfo.children[subItem] : null;
+            
+            // 타입 컬럼 확인 (HARD POINT의 A, B, G 등)
+            const hasType = catInfo && catInfo.hasType;
+            const typeValue = childInfo && childInfo.type ? childInfo.type : '';
+            
+            // 3단계 하위 항목이 있는지 확인 (DRIVE SHAFT > Wheel Bearing > OBJ 등)
+            const hasLevel3 = childInfo && childInfo.isCategory && childInfo.children;
+            const level3Children = hasLevel3 ? Object.keys(childInfo.children) : [];
+            const level3Info = hasLevel3 && subItem2 ? childInfo.children[subItem2] : null;
+            
+            // 컬럼 결정
+            let columns = null;
+            if (level3Info && level3Info.columns) {
+                columns = level3Info.columns;
+            } else if (childInfo && childInfo.columns) {
+                columns = childInfo.columns;
+            } else if (catInfo && catInfo.columns && !(childInfo && childInfo.singleValue)) {
+                columns = catInfo.columns;
+            }
+            
+            const isSingleValue = (childInfo && childInfo.singleValue) || (level3Info && level3Info.singleValue);
+            const placeholder = (childInfo && childInfo.placeholder) || (level3Info && level3Info.placeholder) || '';
+            
+            // 값 입력 필드가 표시되어야 하는 조건
+            const showValues = (subItem && !hasLevel3) || (hasLevel3 && subItem2);
+            
+            return `
+                <div class="ontology-row" data-index="${index}">
+                    <!-- L1: 대분류 -->
+                    <select class="ontology-select category-select" 
+                            onchange="onCategoryChange(${card.id}, ${index}, this.value)">
+                        <option value="">대분류 선택</option>
+                        ${categories.map(cat => `
+                            <option value="${cat}" ${cat === category ? 'selected' : ''}>${cat}</option>
+                        `).join('')}
+                    </select>
+                    
+                    <!-- L2: 하위항목 -->
+                    ${category && children.length > 0 ? `
+                        <select class="ontology-select subitem-select"
+                                onchange="onSubItemChange(${card.id}, ${index}, this.value)">
+                            <option value="">항목 선택</option>
+                            ${children.map(child => `
+                                <option value="${child}" ${child === subItem ? 'selected' : ''}>${child}</option>
+                            `).join('')}
+                        </select>
+                    ` : ''}
+                    
+                    <!-- 타입 컬럼 (HARD POINT 등) -->
+                    ${hasType && subItem ? `
+                        <div class="type-cell">${typeValue}</div>
+                    ` : ''}
+                    
+                    <!-- L3: 3단계 하위항목 -->
+                    ${hasLevel3 ? `
+                        <select class="ontology-select subitem2-select"
+                                onchange="onSubItem2Change(${card.id}, ${index}, this.value)">
+                            <option value="">세부항목</option>
+                            ${level3Children.map(child => `
+                                <option value="${child}" ${child === subItem2 ? 'selected' : ''}>${child}</option>
+                            `).join('')}
+                        </select>
+                    ` : ''}
+                    
+                    <!-- 값 입력 영역 -->
+                    ${showValues ? `
+                        <div class="ontology-values">
+                            <div class="ontology-values-inner">
+                                ${isSingleValue ? `
+                                    <div class="ontology-value-group" style="flex:1;">
+                                        <div class="ontology-value-label">값</div>
+                                        <input type="text" class="ontology-value-input single" 
+                                               placeholder="${placeholder || '값 입력'}"
+                                               value="${values.single || ''}"
+                                               onchange="onOntologyValueChange(${card.id}, ${index}, 'single', this.value)">
+                                    </div>
+                                ` : columns ? `
+                                    ${columns.map((col, colIdx) => `
+                                        <div class="ontology-value-group">
+                                            <div class="ontology-value-label">${col}</div>
+                                            <input type="text" class="ontology-value-input" 
+                                                   placeholder="${col}"
+                                                   value="${values[col] || ''}"
+                                                   onchange="onOntologyValueChange(${card.id}, ${index}, '${col}', this.value)">
+                                        </div>
+                                    `).join('')}
+                                ` : `
+                                    <div class="ontology-value-group" style="flex:1;">
+                                        <div class="ontology-value-label">값</div>
+                                        <input type="text" class="ontology-value-input single" 
+                                               placeholder="값 입력"
+                                               value="${values.single || ''}"
+                                               onchange="onOntologyValueChange(${card.id}, ${index}, 'single', this.value)">
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- 삭제 버튼 -->
+                    <div class="ontology-delete-cell">
+                        <button class="ontology-delete-btn" onclick="removeParam(${card.id}, ${index})" title="삭제">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 온톨로지 이벤트 핸들러
+        function onCategoryChange(cardId, paramIndex, category) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            // 파라미터를 객체 형태로 변환
+            card.params[paramIndex] = {
+                category: category,
+                subItem: '',
+                subItem2: '',
+                values: {}
+            };
+            
+            rerenderCardParams(cardId);
+        }
+
+        function onSubItemChange(cardId, paramIndex, subItem) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            const param = card.params[paramIndex];
+            if (typeof param === 'object') {
+                param.subItem = subItem;
+                param.subItem2 = '';
+                param.values = {};
+            }
+            
+            rerenderCardParams(cardId);
+        }
+
+        function onSubItem2Change(cardId, paramIndex, subItem2) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            const param = card.params[paramIndex];
+            if (typeof param === 'object') {
+                param.subItem2 = subItem2;
+                param.values = {};
+            }
+            
+            rerenderCardParams(cardId);
+        }
+
+        function onOntologyValueChange(cardId, paramIndex, column, value) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            const param = card.params[paramIndex];
+            if (typeof param === 'object') {
+                if (!param.values) param.values = {};
+                param.values[column] = value;
+            }
+        }
+
+        function rerenderCardParams(cardId) {
+            const card = cards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            const paramsContainer = document.getElementById(`params-${cardId}`);
+            if (paramsContainer) {
+                paramsContainer.innerHTML = renderParams(card);
+            }
+        }
+
+        function updateCardData(cardId, field, value) {
+            const card = cards.find(c => c.id === cardId);
+            if (card) {
+                card[field] = value;
+            }
+        }
+
+        function addParam(cardId, useOntology = true) {
+            const card = cards.find(c => c.id === cardId);
+            if (card) {
+                if (useOntology) {
+                    // 온톨로지 기반 파라미터 추가
+                    card.params.push({
+                        category: '',
+                        subItem: '',
+                        subItem2: '',
+                        values: {}
+                    });
+                } else {
+                    // 기존 방식 (단순 텍스트)
+                    card.params.push('');
+                    card.values.push('');
+                }
+                const paramsContainer = document.getElementById(`params-${cardId}`);
+                paramsContainer.innerHTML = renderParams(card);
+                updateStats();
+            }
+        }
+
+        function updateParam(cardId, index, value) {
+            const card = cards.find(c => c.id === cardId);
+            if (card && card.params[index] !== undefined) {
+                card.params[index] = value;
+            }
+        }
+
+        function updateParamValue(cardId, index, value) {
+            const card = cards.find(c => c.id === cardId);
+            if (card && card.values[index] !== undefined) {
+                card.values[index] = value;
+            }
+        }
+
+        function removeParam(cardId, index) {
+            const card = cards.find(c => c.id === cardId);
+            if (card) {
+                card.params.splice(index, 1);
+                card.values.splice(index, 1);
+                const paramsContainer = document.getElementById(`params-${cardId}`);
+                paramsContainer.innerHTML = renderParams(card);
+                updateStats();
+            }
+        }
+
+        function duplicateCard(cardId) {
+            const originalCard = cards.find(c => c.id === cardId);
+            if (originalCard) {
+                const newCard = {
+                    id: ++cardIdCounter,
+                    partName: originalCard.partName + ' (복사)',
+                    status: originalCard.status,
+                    partNumber: originalCard.partNumber,
+                    params: [...originalCard.params],
+                    values: [...originalCard.values]
+                };
+                cards.push(newCard);
+                renderCard(newCard);
+                updateStats();
+            }
+        }
+
+        function deleteCard(cardId) {
+            if (confirm('이 카드를 삭제하시겠습니까?')) {
+                cards = cards.filter(c => c.id !== cardId);
+                const cardElement = document.getElementById(`card-${cardId}`);
+                cardElement.remove();
+                updateStats();
+                
+                // Show empty state if no cards
+                if (cards.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                }
+            }
+        }
+
+        // ============================================
+        // AUTOCOMPLETE
+        // ============================================
+
+        function showAutocomplete(input, cardId, index) {
+            const dropdown = document.getElementById(`autocomplete-${cardId}-${index}`);
+            dropdown.classList.add('show');
+        }
+
+        function hideAutocomplete(input) {
+            setTimeout(() => {
+                const dropdowns = document.querySelectorAll('.autocomplete-dropdown');
+                dropdowns.forEach(d => d.classList.remove('show'));
+            }, 200);
+        }
+
+        function filterAutocomplete(input, cardId, index) {
+            const dropdown = document.getElementById(`autocomplete-${cardId}-${index}`);
+            const filter = input.value.toLowerCase();
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? 'block' : 'none';
+            });
+        }
+
+        function selectPreset(cardId, index, preset) {
+            const card = cards.find(c => c.id === cardId);
+            if (card && card.params[index] !== undefined) {
+                card.params[index] = preset;
+                const paramsContainer = document.getElementById(`params-${cardId}`);
+                paramsContainer.innerHTML = renderParams(card);
+            }
+        }
+
+        // ============================================
+        // TEMPLATE OPERATIONS
+        // ============================================
+
+        function selectTemplate(templateId) {
+            selectedTemplateId = templateId;
+            
+            // Update UI
+            const items = document.querySelectorAll('.template-item');
+            items.forEach(item => item.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            // Update preview in load modal
+            const template = mockTemplates.find(t => t.id === templateId);
+            if (template) {
+                document.getElementById('templatePreview').innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-12);">
+                        <h4 style="color: var(--hyundai-blue); margin: 0;">${template.name}</h4>
+                        <span style="background: var(--progressive-blue); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${template.version || 'v1.0'}</span>
+                    </div>
+                    <p style="margin-bottom: var(--space-8); font-size: var(--font-size-small); color: var(--grey-66);">${template.description}</p>
+                    <div style="display: flex; gap: var(--space-12); font-size: var(--font-size-small); color: var(--grey-dark); align-items: center; flex-wrap: wrap;">
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                            </svg>
+                            ${template.cardCount}개 세트
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            ${template.paramCount}개 파라미터
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+                            </svg>
+                            ${template.category}
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            ${template.createdAt || '2024-01'}
+                        </span>
+                    </div>
+                `;
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+
+        function openSaveModal() {
+            if (cards.length === 0) {
+                alert('저장할 카드가 없습니다. 먼저 카드를 추가해주세요.');
+                return;
+            }
+            document.getElementById('saveModal').classList.add('show');
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').classList.remove('show');
+        }
+
+        function saveTemplate() {
+            const name = document.getElementById('templateName').value;
+            if (!name) {
+                alert('템플릿 이름을 입력해주세요.');
+                return;
+            }
+            
+            const description = document.getElementById('templateDescription').value;
+            const category = document.getElementById('templateCategory').value;
+            const sharing = document.getElementById('templateSharing').value;
+            const saveOption = document.getElementById('templateSaveOption').value;
+            
+            // Prepare cards data based on save option
+            const cardsToSave = cards.map(card => {
+                if (saveOption === 'structure') {
+                    // Structure only - no values
+                    return {
+                        partName: card.partName,
+                        status: card.status,
+                        partNumber: card.partNumber,
+                        params: card.params
+                    };
+                } else {
+                    // With values
+                    return {
+                        partName: card.partName,
+                        status: card.status,
+                        partNumber: card.partNumber,
+                        params: card.params,
+                        values: card.values
+                    };
+                }
+            });
+            
+            // Save logic here
+            console.log('Saving template:', { name, description, category, sharing, saveOption, cards: cardsToSave });
+            
+            alert(`템플릿이 저장되었습니다!\n저장 옵션: ${saveOption === 'structure' ? '구조만' : '값 포함'}`);
+            closeSaveModal();
+        }
+
+        function openLoadModal() {
+            document.getElementById('loadModal').classList.add('show');
+        }
+
+        function closeLoadModal() {
+            document.getElementById('loadModal').classList.remove('show');
+            selectedTemplateId = null;
+            document.getElementById('loadBtn').disabled = true;
+        }
+
+        function loadTemplate() {
+            if (!selectedTemplateId) return;
+            
+            const option = document.getElementById('loadOption').value;
+            const valueOption = document.getElementById('loadValueOption').value;
+            const template = mockTemplates.find(t => t.id === selectedTemplateId);
+            
+            if (option === 'replace') {
+                if (cards.length > 0 && !confirm('현재 작업 내용이 모두 삭제됩니다. 계속하시겠습니까?')) {
+                    return;
+                }
+                clearAll(false);
+            }
+            
+            // Load template cards
+            if (template && template.cards) {
+                template.cards.forEach(cardData => {
+                    const card = {
+                        id: ++cardIdCounter,
+                        partName: cardData.partName,
+                        status: cardData.status,
+                        partNumber: cardData.partNumber,
+                        params: [...cardData.params],
+                        values: valueOption === 'withValues' && cardData.values ? [...cardData.values] : cardData.params.map(() => '')
+                    };
+                    cards.push(card);
+                    renderCard(card);
+                });
+            }
+            
+            updateStats();
+            document.getElementById('emptyState').style.display = 'none';
+            
+            const optionText = valueOption === 'withValues' ? '값 포함' : '구조만';
+            alert(`템플릿을 불러왔습니다! (${optionText})`);
+            closeLoadModal();
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        function toggleSidebar() {
+            document.getElementById('templateSidebar').classList.toggle('collapsed');
+        }
+
+        function updateStats() {
+            document.getElementById('cardCount').textContent = cards.length;
+            const totalParams = cards.reduce((sum, card) => sum + card.params.length, 0);
+            document.getElementById('paramCount').textContent = totalParams;
+        }
+
+        function clearAll(confirm = true) {
+            if (confirm && cards.length > 0 && !window.confirm('모든 카드를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            cards = [];
+            cardIdCounter = 0;
+            document.getElementById('cardGrid').innerHTML = `
+                <div class="empty-state" id="emptyState">
+                    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <div class="empty-title">카드가 없습니다</div>
+                    <div class="empty-text">새 카드를 추가하거나 저장된 버전을 불러오세요</div>
+                    <button class="btn btn-secondary" onclick="addCard()">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        첫 카드 추가하기
+                    </button>
+                </div>
+            `;
+            updateStats();
+        }
+
+        function goToNextStep() {
+            if (cards.length === 0) {
+                alert('먼저 카드를 추가해주세요.');
+                return;
+            }
+            
+            // Save current state to sessionStorage
+            sessionStorage.setItem('templateCards', JSON.stringify(cards));
+            
+            // Redirecting to Step 2
+            window.location.href = "create-step2.html";
+        }
+        // ============================================
+        // AI ASSISTANT FUNCTIONS
+        // ============================================
+
+        let aiAnalyzedCards = [];
+
+        function openAIModal() {
+            document.getElementById('aiModal').classList.add('show');
+            resetAIModal();
+        }
+
+        function closeAIModal() {
+            document.getElementById('aiModal').classList.remove('show');
+            resetAIModal();
+        }
+
+        function resetAIModal() {
+            document.getElementById('aiUploadScreen').style.display = 'block';
+            document.getElementById('aiPasteScreen').style.display = 'none';
+            document.getElementById('aiLoadingScreen').style.display = 'none';
+            document.getElementById('aiResultsScreen').style.display = 'none';
+            document.getElementById('aiChatMessages').innerHTML = '';
+            document.getElementById('aiCardsPreview').innerHTML = '';
+            document.getElementById('uploadTab').classList.add('active');
+            document.getElementById('pasteTab').classList.remove('active');
+            aiAnalyzedCards = [];
+            pastedCellStyles = {};
+            
+            // Clear input fields
+            const partNameInput = document.getElementById('pastePartName');
+            const partNumberInput = document.getElementById('pastePartNumber');
+            if (partNameInput) partNameInput.value = '';
+            if (partNumberInput) partNumberInput.value = '';
+            
+            // Clear spreadsheet if exists
+            if (hotInstance) {
+                clearSpreadsheet();
+            }
+            
+            const footer = document.getElementById('aiModalFooter');
+            footer.innerHTML = '<button class="btn btn-outline" onclick="closeAIModal()">취소</button>';
+        }
+
+        function switchPasteTab(tab) {
+            document.getElementById('uploadTab').classList.remove('active');
+            document.getElementById('pasteTab').classList.remove('active');
+            
+            if (tab === 'upload') {
+                document.getElementById('uploadTab').classList.add('active');
+                document.getElementById('aiUploadScreen').style.display = 'block';
+                document.getElementById('aiPasteScreen').style.display = 'none';
+            } else {
+                document.getElementById('pasteTab').classList.add('active');
+                document.getElementById('aiUploadScreen').style.display = 'none';
+                document.getElementById('aiPasteScreen').style.display = 'block';
+                
+                setTimeout(() => {
+                    if (!hotInstance) {
+                        initSpreadsheet();
+                    }
+                }, 100);
+            }
+        }
+
+        let hotInstance = null;
+        let pastedCellStyles = {};
+
+        function initSpreadsheet() {
+            const container = document.getElementById('spreadsheet');
+            if (!container || hotInstance) return;
+            
+            console.log('스프레드시트 초기화 시작');
+            
+            hotInstance = new Handsontable(container, {
+                data: Array(50).fill(null).map(() => Array(20).fill('')),
+                rowHeaders: true,
+                colHeaders: true,
+                width: '100%',
+                height: 350,
+                licenseKey: 'non-commercial-and-evaluation',
+                contextMenu: true,
+                allowInsertRow: true,
+                allowInsertColumn: true,
+                allowRemoveRow: true,
+                allowRemoveColumn: true,
+                undo: true,
+                outsideClickDeselects: false,
+                autoWrapRow: true,
+                autoWrapCol: true,
+                copyPaste: true,
+                minSpareRows: 10,
+                minSpareCols: 5,
+                // 셀 렌더링 후 배경색 적용
+                afterRenderer: function(td, row, col, prop, value, cellProperties) {
+                    const bgColor = pastedCellStyles[`${row}-${col}`];
+                    if (bgColor) {
+                        td.style.backgroundColor = bgColor;
+                        td.style.fontWeight = 'bold';
+                    }
+                }
+            });
+            
+            // 붙여넣기 이벤트 가로채기 (서식 포함)
+            container.addEventListener('paste', function(e) {
+                const html = e.clipboardData.getData('text/html');
+                if (html && (html.includes('<td') || html.includes('<table') || html.includes('<tr'))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    parseHtmlWithStyles(html);
+                }
+            }, true);
+            
+            console.log('스프레드시트 초기화 완료 (서식 포함 붙여넣기 기본 적용)');
+        }
+        
+        
+        // HTML 파싱하여 데이터와 스타일 추출
+        function parseHtmlWithStyles(html) {
+            console.log('=== HTML 붙여넣기 파싱 시작 ===');
+            pastedCellStyles = {};
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // 스타일 태그에서 클래스별 배경색 추출 (엑셀 형식)
+            const styleMap = {};
+            const styleTags = doc.querySelectorAll('style');
+            styleTags.forEach(styleTag => {
+                const cssText = styleTag.textContent;
+                // .xl65 { background:#FFFF00; } 형식 파싱
+                const matches = cssText.matchAll(/\.(xl\d+)[^{]*\{[^}]*background\s*:\s*([^;}]+)/gi);
+                for (const match of matches) {
+                    styleMap[match[1]] = match[2].trim();
+                    console.log(`스타일 클래스 발견: ${match[1]} = ${match[2]}`);
+                }
+            });
+            
+            const rows = doc.querySelectorAll('tr');
+            
+            if (rows.length === 0) {
+                console.log('테이블 행이 없음');
+                alert('테이블 데이터를 찾을 수 없습니다.');
+                return;
+            }
+            
+            const data = [];
+            let rowIndex = 0;
+            
+            rows.forEach((tr) => {
+                const cells = tr.querySelectorAll('td, th');
+                const rowData = [];
+                let colIndex = 0;
+                
+                cells.forEach((cell) => {
+                    const text = cell.textContent.trim();
+                    
+                    // colspan 처리 (병합된 셀)
+                    const colspan = parseInt(cell.getAttribute('colspan')) || 1;
+                    
+                    // 배경색 추출 (여러 방법 시도)
+                    let bgColor = null;
+                    
+                    // 1. 인라인 스타일에서 추출
+                    const style = cell.getAttribute('style') || '';
+                    const bgMatch = style.match(/background(?:-color)?:\s*([^;]+)/i);
+                    if (bgMatch) {
+                        bgColor = bgMatch[1].trim();
+                    }
+                    
+                    // 2. bgcolor 속성
+                    if (!bgColor && cell.getAttribute('bgcolor')) {
+                        bgColor = cell.getAttribute('bgcolor');
+                    }
+                    
+                    // 3. 엑셀 클래스 (xl65 등)에서 추출
+                    if (!bgColor) {
+                        const cellClass = cell.getAttribute('class') || '';
+                        const xlMatch = cellClass.match(/xl\d+/);
+                        if (xlMatch && styleMap[xlMatch[0]]) {
+                            bgColor = styleMap[xlMatch[0]];
+                        }
+                    }
+                    
+                    // 4. 내부 요소의 배경색 확인
+                    if (!bgColor) {
+                        const innerElements = cell.querySelectorAll('*');
+                        for (const el of innerElements) {
+                            const elStyle = el.getAttribute('style') || '';
+                            const elMatch = elStyle.match(/background(?:-color)?:\s*([^;]+)/i);
+                            if (elMatch) {
+                                bgColor = elMatch[1].trim();
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 배경색 정규화
+                    if (bgColor) {
+                        bgColor = bgColor.toLowerCase().trim();
+                        const isWhite = bgColor === 'white' || bgColor === '#ffffff' || bgColor === '#fff' || 
+                                       bgColor === 'transparent' || bgColor === 'rgb(255, 255, 255)' ||
+                                       bgColor === 'window' || bgColor === 'windowtext';
+                        if (isWhite) bgColor = null;
+                    }
+                    
+                    // colspan만큼 셀 추가
+                    for (let i = 0; i < colspan; i++) {
+                        if (i === 0) {
+                            rowData.push(text);
+                        } else {
+                            rowData.push(''); // colspan으로 인한 빈 셀
+                        }
+                        
+                        // 배경색 저장
+                        if (bgColor) {
+                            pastedCellStyles[`${rowIndex}-${colIndex}`] = bgColor;
+                            if (i === 0) {
+                                console.log(`✓ 셀 [${rowIndex},${colIndex}] 배경색: ${bgColor}, 값: "${text}"${colspan > 1 ? ` (colspan=${colspan})` : ''}`);
+                            }
+                        }
+                        
+                        colIndex++;
+                    }
+                });
+                
+                if (rowData.length > 0) {
+                    data.push(rowData);
+                    rowIndex++;
+                }
+            });
+            
+            const colorCount = Object.keys(pastedCellStyles).length;
+            console.log(`=== 파싱 완료: ${data.length}행, 배경색 셀 ${colorCount}개 ===`);
+            
+            // Handsontable에 데이터 로드
+            if (hotInstance && data.length > 0) {
+                const maxCols = Math.max(...data.map(r => r.length));
+                const paddedData = data.map(row => {
+                    while (row.length < maxCols) row.push('');
+                    return row;
+                });
+                
+                // 새 데이터 로드 후 렌더러 재설정
+                hotInstance.loadData(paddedData);
+                
+                // 배경색 적용을 위해 강제 렌더링
+                setTimeout(() => {
+                    hotInstance.render();
+                    
+                    // 배경색이 있는 경우 알림
+                    if (colorCount > 0) {
+                        console.log('배경색이 적용되었습니다.');
+                    } else {
+                        console.log('배경색 정보가 없습니다. 엑셀에서 배경색이 있는 셀을 포함하여 복사해주세요.');
+                    }
+                }, 100);
+            }
+        }
+
+        function clearSpreadsheet() {
+            if (hotInstance) {
+                hotInstance.loadData(Array(50).fill(null).map(() => Array(20).fill('')));
+                pastedCellStyles = {};
+                console.log('스프레드시트 초기화');
+            }
+        }
+        
+        // 배경색이 노란색 계열인지 확인
+        function isYellowish(color) {
+            if (!color) return false;
+            color = color.toLowerCase();
+            if (color.includes('yellow')) return true;
+            if (color.includes('#ff') && color.includes('00')) return true; // #ffff00, #fff000 등
+            // rgb 형식 체크
+            const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (rgbMatch) {
+                const r = parseInt(rgbMatch[1]);
+                const g = parseInt(rgbMatch[2]);
+                const b = parseInt(rgbMatch[3]);
+                // 노란색 계열: R과 G가 높고 B가 낮음
+                if (r > 200 && g > 200 && b < 150) return true;
+            }
+            return false;
+        }
+        
+        // 배경색이 회색/연한 색 계열인지 확인 (헤더용)
+        function isGrayish(color) {
+            if (!color) return false;
+            color = color.toLowerCase();
+            if (color.includes('gray') || color.includes('grey') || color.includes('silver')) return true;
+            // rgb 형식 체크
+            const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (rgbMatch) {
+                const r = parseInt(rgbMatch[1]);
+                const g = parseInt(rgbMatch[2]);
+                const b = parseInt(rgbMatch[3]);
+                // 회색 계열: R, G, B가 비슷하고 중간값
+                if (Math.abs(r - g) < 30 && Math.abs(g - b) < 30 && r > 150 && r < 240) return true;
+            }
+            return false;
+        }
+        
+        // 배경색이 있는지 확인 (흰색/투명 제외)
+        function hasBackgroundColor(color) {
+            if (!color) return false;
+            color = color.toLowerCase();
+            if (color === 'white' || color === '#ffffff' || color === '#fff' || color === 'transparent') return false;
+            if (color === 'rgb(255, 255, 255)') return false;
+            return true;
+        }
+
+        // 테이블 그대로 하나의 세트로 등록 (배경색 기반 구분)
+        function registerAsOneSet() {
+            console.log('테이블 그대로 등록 시작 (배경색 기반)');
+            
+            let partName = document.getElementById('pastePartName').value.trim();
+            const partNumber = document.getElementById('pastePartNumber').value.trim();
+            
+            if (!hotInstance) {
+                alert('스프레드시트가 초기화되지 않았습니다.');
+                return;
+            }
+            
+            const data = hotInstance.getData();
+            const params = [];
+            let detectedPartName = null;
+            let currentCategory = '';
+            
+            // 유효한 데이터 범위 찾기
+            let minRow = -1, maxRow = -1, minCol = -1, maxCol = -1;
+            for (let row = 0; row < data.length; row++) {
+                for (let col = 0; col < data[row].length; col++) {
+                    if (data[row][col] && data[row][col].toString().trim()) {
+                        if (minRow === -1) minRow = row;
+                        maxRow = row;
+                        if (minCol === -1 || col < minCol) minCol = col;
+                        if (col > maxCol) maxCol = col;
+                    }
+                }
+            }
+            
+            if (minRow === -1) {
+                alert('추출할 데이터가 없습니다.');
+                return;
+            }
+            
+            console.log(`데이터 범위: 행 ${minRow}-${maxRow}, 열 ${minCol}-${maxCol}`);
+            console.log(`저장된 배경색 셀: ${Object.keys(pastedCellStyles).length}개`);
+            
+            // 각 행 처리
+            for (let row = minRow; row <= maxRow; row++) {
+                const cells = [];
+                const cellColors = [];
+                
+                for (let col = minCol; col <= maxCol; col++) {
+                    const val = data[row][col];
+                    cells.push(val ? val.toString().trim() : '');
+                    cellColors.push(pastedCellStyles[`${row}-${col}`] || null);
+                }
+                
+                // 빈 행 스킵
+                if (!cells.some(c => c)) continue;
+                
+                const firstCell = cells[0];
+                const firstColor = cellColors[0];
+                
+                // 배경색에 따른 분류
+                if (isYellowish(firstColor)) {
+                    // 노란색: 대분류/부품명
+                    if (!detectedPartName) {
+                        detectedPartName = firstCell;
+                        console.log(`[대분류/부품명 감지] ${firstCell} (배경: ${firstColor})`);
+                    } else {
+                        currentCategory = firstCell;
+                        console.log(`[카테고리 감지] ${firstCell} (배경: ${firstColor})`);
+                    }
+                } else if (isGrayish(firstColor) || (hasBackgroundColor(firstColor) && !isYellowish(firstColor))) {
+                    // 회색/기타 색상: 소분류/헤더
+                    currentCategory = firstCell;
+                    console.log(`[소분류/헤더 감지] ${firstCell} (배경: ${firstColor})`);
+                } else {
+                    // 배경색 없음: 파라미터 데이터
+                    if (cells.length >= 2 && firstCell) {
+                        const name = currentCategory ? `${currentCategory} - ${firstCell}` : firstCell;
+                        const values = cells.slice(1).filter(v => v);
+                        const value = values.join(', ');
+                        
+                        // 헤더 행 스킵
+                        if (!firstCell.match(/^(파라미터|Parameter|Name|이름|항목|구분|값|Value)$/i)) {
+                            params.push({ name: firstCell, value, category: currentCategory });
+                            console.log(`[파라미터] ${firstCell} = ${value} (카테고리: ${currentCategory})`);
+                        }
+                    } else if (cells.length === 1 && firstCell) {
+                        // 1열만 있는 경우
+                        const match = firstCell.match(/^(.+?)\s*[:=]\s*(.*)$/);
+                        if (match) {
+                            params.push({ name: match[1].trim(), value: match[2].trim(), category: currentCategory });
+                        }
+                    }
+                }
+            }
+            
+            // 부품명 결정
+            if (!partName && detectedPartName) {
+                partName = detectedPartName;
+                document.getElementById('pastePartName').value = partName;
+            }
+            
+            if (!partName) {
+                alert('부품명을 입력하거나, 노란색 배경의 부품명이 있는 데이터를 붙여넣어주세요.');
+                document.getElementById('pastePartName').focus();
+                return;
+            }
+            
+            if (params.length === 0) {
+                alert('추출할 파라미터가 없습니다. 데이터를 확인해주세요.');
+                return;
+            }
+            
+            console.log('=== 최종 결과 ===');
+            console.log(`부품명: ${partName}`);
+            console.log(`추출된 파라미터: ${params.length}개`);
+            
+            // AI 결과 화면으로 전환
+            aiAnalyzedCards = [{
+                partName: partName,
+                partNumber: partNumber,
+                status: '신규',
+                params: params.map(p => ({ name: p.name, value: p.value }))
+            }];
+            
+            document.getElementById('aiPasteScreen').style.display = 'none';
+            displayAIResults();
+            
+            // 카테고리별 개수 집계
+            const categories = [...new Set(params.map(p => p.category).filter(c => c))];
+            const categoryInfo = categories.length > 0 
+                ? `\n📁 감지된 카테고리: ${categories.join(', ')}`
+                : '';
+            
+            addAIMessage(`✅ 배경색 기반으로 데이터를 분석했습니다.\n\n📦 부품명: ${partName}${detectedPartName ? ' (자동 감지)' : ''}\n🔢 부품번호: ${partNumber || '(없음)'}\n📊 파라미터: ${params.length}개${categoryInfo}\n\n확인 후 "확정하고 카드 생성" 버튼을 클릭하세요.`);
+        }
+
+        async function analyzeSpreadsheetData() {
+            console.log('스프레드시트 분석 시작');
+            
+            if (!hotInstance) {
+                alert('스프레드시트가 초기화되지 않았습니다.');
+                return;
+            }
+            
+            const data = hotInstance.getData();
+            console.log('스프레드시트 데이터 크기:', data.length, 'x', data[0].length);
+            
+            // Convert 2D array to formatted string
+            let formattedData = '';
+            let cellIndex = 1;
+            let cellCount = 0;
+            
+            for (let row = 0; row < data.length; row++) {
+                for (let col = 0; col < data[row].length; col++) {
+                    const value = data[row][col];
+                    if (value && value.toString().trim()) {
+                        formattedData += `[A${cellIndex}] ${value.toString().trim()}\n`;
+                        cellIndex++;
+                        cellCount++;
+                    }
+                }
+            }
+            
+            console.log('추출된 셀 수:', cellCount);
+            console.log('포맷된 데이터 샘플:', formattedData.substring(0, 200));
+            
+            if (!formattedData.trim()) {
+                alert('입력된 데이터가 없습니다.');
+                return;
+            }
+            
+            // Hide paste screen, show loading
+            document.getElementById('aiPasteScreen').style.display = 'none';
+            document.getElementById('aiLoadingScreen').style.display = 'block';
+            updateAILoadingMessage('데이터를 분석하고 있어요...');
+            
+            await analyzeWithAI(formattedData, 'excel');
+        }
+
+        // Setup paste area event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // No longer need paste area event listeners
+        });
+
+        // Drag and drop
+        const aiUploadArea = document.getElementById('aiUploadArea');
+        if (aiUploadArea) {
+            aiUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            
+            aiUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleAIFileUpload(files[0]);
+                }
+            });
+        }
+
+        function handleAIFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleAIFileUpload(file);
+            }
+        }
+
+        async function handleAIFileUpload(file) {
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            // Show loading
+            document.getElementById('aiUploadScreen').style.display = 'none';
+            document.getElementById('aiLoadingScreen').style.display = 'block';
+            
+            if (fileType === 'xlsx' || fileType === 'xls') {
+                await analyzeExcel(file);
+            } else if (fileType === 'png' || fileType === 'jpg' || fileType === 'jpeg') {
+                await analyzeImage(file);
+            }
+        }
+
+        async function analyzeExcel(file) {
+            updateAILoadingMessage('엑셀 파일을 읽고 있어요...');
+            
+            try {
+                const data = await file.arrayBuffer();
+                const workbook = XLSX.read(data);
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const range = XLSX.utils.decode_range(sheet['!ref']);
+                
+                // Extract cell data
+                let cellsData = [];
+                for (let R = range.s.r; R <= range.e.r; R++) {
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                        const cell = sheet[cellAddress];
+                        if (cell && cell.v) {
+                            cellsData.push({
+                                address: cellAddress,
+                                value: String(cell.v).trim()
+                            });
+                        }
+                    }
+                }
+                
+                updateAILoadingMessage('데이터를 분석하고 있어요...');
+                
+                const cellsText = cellsData.map(c => `[${c.address}] ${c.value}`).join('\n');
+                await analyzeWithAI(cellsText, 'excel');
+                
+            } catch (error) {
+                console.error('Excel analysis error:', error);
+                showAIError('엑셀 파일을 읽는 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        async function analyzeImage(file) {
+            updateAILoadingMessage('이미지를 읽고 있어요...');
+            
+            try {
+                const base64 = await fileToBase64(file);
+                updateAILoadingMessage('이미지를 분석하고 있어요...');
+                
+                // 이미지를 직접 AI에게 전달
+                await analyzeWithAI(base64, 'image');
+                
+            } catch (error) {
+                console.error('Image analysis error:', error);
+                showAIError('이미지 분석 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        async function analyzeWithAI(data, type) {
+            try {
+                let prompt = '';
+                let content = [];
+                
+                if (type === 'excel') {
+                    prompt = `다음은 엑셀 시트의 셀 데이터입니다:
+
+${data}
+
+이 데이터에서 자동차 부품 정보를 추출해주세요. 
+규칙:
+- 노란색 배경이나 병합된 셀은 보통 부품명/부품번호를 나타냅니다
+- 각 부품 아래에 파라미터명과 값이 나열됩니다
+- "반경 P1", "반경 P2", "축 Q" 같은 형식입니다
+
+다음 JSON 형식으로 반환해주세요:
+{
+  "parts": [
+    {
+      "partName": "부품명",
+      "partNumber": "부품번호",
+      "status": "신규",
+      "params": [
+        {"name": "파라미터명", "value": "값"}
+      ]
+    }
+  ]
+}
+
+JSON만 반환하고 다른 설명은 불필요합니다.`;
+                    
+                    content = [{ type: 'text', text: prompt }];
+                    
+                } else {
+                    prompt = `이 이미지에서 자동차 부품의 파라미터 데이터를 추출해주세요.
+보통 표 형식으로 되어 있으며:
+- 노란색 배경: 부품명/부품번호
+- 그 아래: 파라미터명과 값
+
+다음 JSON 형식으로 반환해주세요:
+{
+  "parts": [
+    {
+      "partName": "부품명",
+      "partNumber": "부품번호",
+      "status": "신규",
+      "params": [
+        {"name": "파라미터명", "value": "값"}
+      ]
+    }
+  ]
+}
+
+JSON만 반환하고 다른 설명은 불필요합니다.`;
+                    
+                    content = [
+                        {
+                            type: 'image',
+                            source: {
+                                type: 'base64',
+                                media_type: 'image/png',
+                                data: data.split(',')[1]
+                            }
+                        },
+                        { type: 'text', text: prompt }
+                    ];
+                }
+                
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 4000,
+                        messages: [{ role: 'user', content: content }]
+                    })
+                });
+                
+                const result = await response.json();
+                const aiResponse = result.content[0].text;
+                
+                // Parse JSON response
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    aiAnalyzedCards = parsed.parts || [];
+                    
+                    displayAIResults();
+                } else {
+                    throw new Error('AI 응답을 파싱할 수 없습니다');
+                }
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showAIError('분석 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function parseExcelData(cellsText) {
+            console.log('=== 파싱 시작 ===');
+            console.log('입력 데이터:', cellsText.substring(0, 500)); // 처음 500자만 로그
+            
+            const lines = cellsText.split('\n');
+            const cards = [];
+            let currentCard = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // [A1] 형식 제거
+                const cleanLine = line.replace(/^\[.*?\]\s*/, '').trim();
+                if (!cleanLine || cleanLine.length < 2) continue;
+                
+                console.log(`라인 ${i}: "${cleanLine}"`);
+                
+                // 부품명 패턴: 대문자 3글자 이상, 또는 한글 2글자 이상, 또는 괄호 포함
+                if (cleanLine.match(/^[A-Z][A-Z_\/(),\s]{2,}$/i) || 
+                    cleanLine.match(/^[가-힣]{2,}$/) ||
+                    cleanLine.match(/\([A-Z\/]+\)/)) {
+                    
+                    // 이전 카드 저장
+                    if (currentCard && currentCard.params.length > 0) {
+                        console.log('카드 저장:', currentCard.partName, '- 파라미터', currentCard.params.length);
+                        cards.push(currentCard);
+                    }
+                    
+                    // 새 카드 시작
+                    currentCard = {
+                        partName: cleanLine,
+                        partNumber: '',
+                        status: '신규',
+                        params: []
+                    };
+                    console.log('새 카드 시작:', cleanLine);
+                    
+                    // 다음 줄에 부품번호가 있는지 확인
+                    if (i + 1 < lines.length) {
+                        const nextLine = lines[i + 1].replace(/^\[.*?\]\s*/, '').trim();
+                        // 부품번호 패턴: 숫자 포함 + 하이픈
+                        if (nextLine.match(/\d{3,}/) && nextLine.match(/[-,]/)) {
+                            currentCard.partNumber = nextLine;
+                            console.log('부품번호:', nextLine);
+                            i++; // 다음 줄 스킵
+                        }
+                    }
+                }
+                // 파라미터 패턴: 숫자가 아니고 특수문자 포함
+                else if (currentCard) {
+                    // 파라미터명 후보
+                    if (!cleanLine.match(/^\d+$/) && cleanLine.length < 30) {
+                        const paramName = cleanLine;
+                        
+                        // 다음 줄이 값인지 확인
+                        if (i + 1 < lines.length) {
+                            const nextLine = lines[i + 1].replace(/^\[.*?\]\s*/, '').trim();
+                            // 숫자 또는 N 같은 단일 문자
+                            if (nextLine.match(/^-?\d+(\.\d+)?$/) || nextLine === 'N' || nextLine.match(/^[A-Z]$/)) {
+                                currentCard.params.push({
+                                    name: paramName,
+                                    value: nextLine
+                                });
+                                console.log('파라미터 추가:', paramName, '=', nextLine);
+                                i++; // 다음 줄 스킵
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // 마지막 카드 저장
+            if (currentCard && currentCard.params.length > 0) {
+                console.log('마지막 카드 저장:', currentCard.partName);
+                cards.push(currentCard);
+            }
+            
+            console.log('=== 파싱 완료 ===');
+            console.log('총', cards.length, '개 카드 생성됨');
+            
+            // 카드가 없으면 샘플 카드라도 생성
+            if (cards.length === 0) {
+                console.warn('파싱 실패! 샘플 카드 생성');
+                cards.push({
+                    partName: 'SAMPLE_PART',
+                    partNumber: '00000-00000',
+                    status: '신규',
+                    params: [
+                        { name: '파라미터 1', value: '100' },
+                        { name: '파라미터 2', value: '200' }
+                    ]
+                });
+            }
+            
+            return cards;
+        }
+
+        function displayAIResults() {
+            document.getElementById('aiLoadingScreen').style.display = 'none';
+            document.getElementById('aiResultsScreen').style.display = 'block';
+            
+            // Add message
+            addAIChatMessage(`${aiAnalyzedCards.length}개의 부품 카드를 찾았어요!\n\n각 카드를 확인하고 필요하면 직접 수정할 수 있습니다.`);
+            
+            // Display cards
+            displayAICards();
+            
+            // Update footer
+            const footer = document.getElementById('aiModalFooter');
+            footer.innerHTML = `
+                <button class="btn btn-outline" onclick="resetAIModal()">다시 업로드</button>
+                <button class="btn btn-primary" onclick="confirmAICards()">확정하고 카드 생성</button>
+            `;
+        }
+
+        function displayAICards() {
+            const preview = document.getElementById('aiCardsPreview');
+            document.getElementById('aiCardCount').textContent = aiAnalyzedCards.length;
+            
+            preview.innerHTML = '';
+            
+            aiAnalyzedCards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'ai-card-item';
+                cardEl.innerHTML = `
+                    <div class="ai-card-header">
+                        ${card.partName || '부품명 없음'} | ${card.partNumber || '-'} | ${card.status || '신규'}
+                    </div>
+                    ${card.params.map(p => `
+                        <div class="ai-param">
+                            <span>${p.name}</span>
+                            <strong>${p.value || '-'}</strong>
+                        </div>
+                    `).join('')}
+                `;
+                preview.appendChild(cardEl);
+            });
+        }
+
+        function addAIChatMessage(text) {
+            const messages = document.getElementById('aiChatMessages');
+            const message = document.createElement('div');
+            message.className = 'ai-message';
+            message.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-8); margin-bottom: var(--space-8);">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                    </svg>
+                    <strong>AI</strong>
+                </div>
+                ${text.replace(/\n/g, '<br>')}
+            `;
+            messages.appendChild(message);
+        }
+
+        function updateAILoadingMessage(msg) {
+            document.getElementById('aiLoadingMessage').textContent = msg;
+        }
+
+        function showAIError(msg) {
+            document.getElementById('aiLoadingScreen').style.display = 'none';
+            document.getElementById('aiUploadScreen').style.display = 'block';
+            alert(msg + '\n\n다시 시도해주세요.');
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function confirmAICards() {
+            console.log('confirmAICards 시작, 카드 수:', aiAnalyzedCards.length);
+            
+            if (aiAnalyzedCards.length === 0) {
+                alert('생성할 카드가 없습니다.');
+                return;
+            }
+            
+            try {
+                // Convert AI cards to system cards
+                aiAnalyzedCards.forEach((aiCard, index) => {
+                    console.log(`카드 ${index + 1} 처리:`, aiCard.partName);
+                    
+                    const card = {
+                        id: ++cardIdCounter,
+                        partName: aiCard.partName,
+                        status: aiCard.status || '신규',
+                        partNumber: aiCard.partNumber,
+                        params: aiCard.params.map(p => p.name),
+                        values: aiCard.params.map(p => p.value || '')
+                    };
+                    cards.push(card);
+                    renderCard(card);
+                });
+                
+                updateStats();
+                document.getElementById('emptyState').style.display = 'none';
+                
+                console.log('카드 생성 완료, 총:', cards.length);
+                
+                closeAIModal();
+                alert(`${aiAnalyzedCards.length}개의 카드가 생성되었습니다!`);
+            } catch (error) {
+                console.error('카드 생성 중 오류:', error);
+                alert('카드 생성 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+    </script>
+    <!-- AI Assistant Modal -->
+    <div class="ai-modal-overlay" id="aiModal">
+        <div class="ai-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">AI 어시스턴트</h3>
+                <button class="modal-close" onclick="closeAIModal()">×</button>
+            </div>
+            <div class="modal-body" id="aiModalBody">
+                <!-- Upload/Paste Tabs -->
+                <div style="display: flex; gap: var(--space-12); margin-bottom: var(--space-16); border-bottom: 1px solid var(--hyundai-sand);">
+                    <button class="paste-tab active" onclick="switchPasteTab('upload')" id="uploadTab">
+                        파일 업로드
+                    </button>
+                    <button class="paste-tab" onclick="switchPasteTab('paste')" id="pasteTab">
+                        셀 붙여넣기
+                    </button>
+                </div>
+
+                <!-- Upload Screen -->
+                <div id="aiUploadScreen">
+                    <div class="ai-upload-area" id="aiUploadArea" onclick="document.getElementById('aiFileInput').click()">
+                        <svg class="ai-upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <div style="font-size: var(--font-size-h4); color: var(--grey-66); margin-bottom: var(--space-8);">
+                            파일을 드래그하거나 클릭하여 선택
+                        </div>
+                        <div style="font-size: var(--font-size-small); color: var(--grey-dark);">
+                            엑셀 또는 이미지 파일을 업로드하세요
+                        </div>
+                    </div>
+
+                    <input type="file" id="aiFileInput" style="display: none;" accept=".xlsx,.xls,.png,.jpg,.jpeg" onchange="handleAIFile(event)">
+
+                    <div class="ai-tips">
+                        <div style="display: flex; align-items: center; gap: var(--space-8); font-weight: var(--weight-medium); margin-bottom: var(--space-8);">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            사용 가이드
+                        </div>
+                        <ul>
+                            <li>엑셀 파일이 가장 정확합니다 (정확도 95% 이상)</li>
+                            <li>이미지는 AI Vision으로 분석됩니다 (정확도 85-95%)</li>
+                            <li>다양한 형식의 파일을 업로드할 수 있습니다</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Paste Screen -->
+                <div id="aiPasteScreen" style="display: none;">
+                    <div style="margin-bottom: var(--space-16); padding: var(--space-16); background: var(--hyundai-light-sand); border-radius: var(--card-radius); border-left: 4px solid var(--progressive-blue);">
+                        <div style="display: flex; align-items: center; gap: var(--space-8); margin-bottom: var(--space-8); font-weight: var(--weight-medium);">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            사용 방법
+                        </div>
+                        <ol style="margin-left: var(--space-20); font-size: var(--font-size-small); color: var(--grey-66);">
+                            <li style="margin-bottom: var(--space-4);">엑셀에서 데이터를 선택하고 <strong>Ctrl+C</strong> (복사)</li>
+                            <li style="margin-bottom: var(--space-4);">아래 시트 클릭 후 <strong>Ctrl+V</strong> (붙여넣기) - 🎨 배경색 자동 적용</li>
+                            <li style="margin-bottom: var(--space-4);">"테이블 그대로 등록" 버튼 클릭</li>
+                        </ol>
+                    </div>
+
+                    <div id="spreadsheet" style="height: 350px; border: 1px solid var(--hyundai-sand); border-radius: var(--card-radius); overflow: hidden;"></div>
+
+                    <!-- 등록 옵션 -->
+                    <div style="margin-top: var(--space-16); padding: var(--space-16); background: var(--white); border: 1px solid var(--hyundai-sand); border-radius: var(--card-radius);">
+                        <div style="font-weight: var(--weight-medium); margin-bottom: var(--space-12); color: var(--hyundai-blue);">세트 정보 입력</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-12); margin-bottom: var(--space-12);">
+                            <div>
+                                <label style="font-size: var(--font-size-small); color: var(--grey-66); display: block; margin-bottom: 4px;">부품명 *</label>
+                                <input type="text" id="pastePartName" placeholder="예: LWR/ARM Static" style="width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--hyundai-sand); border-radius: 4px;">
+                            </div>
+                            <div>
+                                <label style="font-size: var(--font-size-small); color: var(--grey-66); display: block; margin-bottom: 4px;">부품번호</label>
+                                <input type="text" id="pastePartNumber" placeholder="예: 00 (코멘트 60)" style="width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--hyundai-sand); border-radius: 4px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; gap: var(--space-8); margin-top: var(--space-16);">
+                        <button class="btn btn-outline" onclick="clearSpreadsheet()">
+                            전체 지우기
+                        </button>
+                        <div style="display: flex; gap: var(--space-8);">
+                            <button class="btn btn-outline" onclick="analyzeSpreadsheetData()" title="AI가 여러 세트로 분리 분석">
+                                AI 분석 (다중 세트)
+                            </button>
+                            <button class="btn btn-primary" onclick="registerAsOneSet()" title="테이블 전체를 하나의 세트로 등록">
+                                📋 테이블 그대로 등록
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Screen -->
+                <div id="aiLoadingScreen" style="display: none;">
+                    <div class="ai-loading">
+                        <div class="ai-spinner"></div>
+                        <div style="font-size: var(--font-size-h4); color: var(--grey-66); margin-bottom: var(--space-8);">
+                            데이터를 분석하고 있습니다...
+                        </div>
+                        <div style="font-size: var(--font-size-small); color: var(--grey-dark);" id="aiLoadingMessage">
+                            파일을 읽고 있어요
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Screen -->
+                <div id="aiResultsScreen" style="display: none;">
+                    <div class="ai-results">
+                        <div class="ai-chat">
+                            <div style="font-weight: var(--weight-medium); margin-bottom: var(--space-12); color: var(--hyundai-blue);">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="vertical-align: middle;">
+                                    <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+                                </svg>
+                                AI 대화
+                            </div>
+                            <div id="aiChatMessages"></div>
+                        </div>
+                        <div class="ai-cards-preview">
+                            <div style="font-weight: var(--weight-medium); margin-bottom: var(--space-12); color: var(--hyundai-blue);">
+                                카드 미리보기 (<span id="aiCardCount">0</span>개)
+                            </div>
+                            <div id="aiCardsPreview"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="aiModalFooter">
+                <button class="btn btn-outline" onclick="closeAIModal()">취소</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI 시뮬레이션 - 해석 & Base값 도출 - 현대자동차 R&D</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+        :root {
+            --hyundai-blue: #002c5f;
+            --white: #ffffff;
+            --black: #000000;
+            --hyundai-sand: #e4dcd3;
+            --hyundai-light-sand: #f6f3f2;
+            --grey-dark: #676767;
+            --grey-light: #cccccc;
+            --grey-disabled: #999999;
+            --progressive-blue: #00aad2;
+            --active-red: #e63312;
+            --success-green: #28a745;
+            --warning-yellow: #f9a825;
+            --yellow-light: #fffbea;
+            
+            --font-text: 'Noto Sans KR', sans-serif;
+            --weight-light: 300;
+            --weight-regular: 400;
+            --weight-medium: 500;
+            --weight-bold: 700;
+            
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-40: 40px;
+            
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            
+            --shadow-sm: 0 2px 4px rgba(0, 44, 95, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 44, 95, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 44, 95, 0.15);
+            
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-text); background: var(--hyundai-light-sand); color: var(--black); }
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+
+        .global-nav { width: 240px; background: var(--hyundai-blue); color: var(--white); display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo-area { padding: var(--space-24); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .logo-title { font-size: 20px; font-weight: var(--weight-medium); }
+        .logo-subtitle { font-size: 14px; opacity: 0.7; margin-top: var(--space-4); }
+        .nav-menu { flex: 1; padding: var(--space-16); }
+        .nav-item { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-12) var(--space-16); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); color: rgba(255, 255, 255, 0.7); margin-bottom: var(--space-4); }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.1); color: var(--white); }
+        .nav-item.active { background: rgba(255, 255, 255, 0.15); color: var(--white); }
+        .nav-icon { width: 20px; height: 20px; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .top-bar { min-height: 70px; background: var(--white); border-bottom: 1px solid var(--hyundai-sand); display: flex; align-items: center; justify-content: space-between; padding: var(--space-16) var(--space-32); flex-wrap: wrap; gap: var(--space-16); }
+        .top-bar-left { display: flex; flex-direction: column; gap: var(--space-8); }
+        .breadcrumb { display: flex; align-items: center; gap: var(--space-8); font-size: 14px; color: var(--grey-dark); }
+        .breadcrumb-link { color: var(--progressive-blue); cursor: pointer; text-decoration: none; }
+        .breadcrumb-link:hover { text-decoration: underline; }
+        .page-title { font-size: 24px; font-weight: var(--weight-medium); color: var(--hyundai-blue); }
+        .top-bar-actions { display: flex; gap: var(--space-12); }
+
+        .stepper { display: flex; align-items: center; gap: var(--space-8); padding: var(--space-20) var(--space-32); background: var(--white); border-bottom: 1px solid var(--hyundai-sand); }
+        .step { display: flex; align-items: center; gap: var(--space-8); font-size: 14px; color: var(--grey-disabled); }
+        .step.active { color: var(--hyundai-blue); font-weight: var(--weight-medium); }
+        .step.completed { color: var(--success-green); }
+        .step-number { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: var(--weight-bold); background: var(--grey-light); color: var(--white); }
+        .step.active .step-number { background: var(--hyundai-blue); }
+        .step.completed .step-number { background: var(--success-green); }
+        .step-connector { width: 60px; height: 2px; background: var(--grey-light); }
+        .step-connector.completed { background: var(--success-green); }
+
+        .content-area { flex: 1; padding: var(--space-24) var(--space-32); overflow-y: auto; }
+
+        .btn { display: inline-flex; align-items: center; gap: var(--space-8); padding: var(--space-12) var(--space-20); font-size: 14px; font-weight: var(--weight-medium); border: none; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); font-family: var(--font-text); }
+        .btn-primary { background: var(--hyundai-blue); color: var(--white); }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: var(--white); color: var(--hyundai-blue); border: 1px solid var(--hyundai-sand); }
+        .btn-secondary:hover { background: var(--hyundai-light-sand); }
+        .btn-run { background: var(--hyundai-blue); color: var(--white); padding: var(--space-16) var(--space-32); font-size: 16px; }
+        .btn-run:hover { opacity: 0.95; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-run:disabled { background: var(--grey-light); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-success { background: var(--success-green); color: var(--white); }
+
+        .section-card { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: var(--space-24); }
+        .section-header { padding: var(--space-20) var(--space-24); border-bottom: 1px solid var(--hyundai-sand); display: flex; align-items: center; justify-content: space-between; }
+        .section-title { font-size: 16px; font-weight: var(--weight-medium); color: var(--hyundai-blue); display: flex; align-items: center; gap: var(--space-8); }
+        .section-body { padding: var(--space-24); }
+
+        .form-row { display: flex; gap: var(--space-24); margin-bottom: var(--space-20); }
+        .form-group { flex: 1; }
+        .form-label { display: block; font-size: 13px; font-weight: var(--weight-medium); color: var(--grey-dark); margin-bottom: var(--space-8); }
+        .form-select { width: 100%; height: 44px; padding: 0 var(--space-16); font-size: 14px; border: 1px solid var(--hyundai-sand); border-radius: var(--radius-sm); background: var(--white); font-family: var(--font-text); cursor: pointer; }
+        .form-select:focus { outline: none; border-color: var(--progressive-blue); }
+
+        .kpi-result-card { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: var(--space-24); overflow: hidden; }
+        .kpi-result-header { background: var(--hyundai-blue); color: var(--white); padding: var(--space-20) var(--space-24); display: flex; justify-content: space-between; align-items: center; }
+        .kpi-result-title { font-size: 18px; font-weight: var(--weight-medium); display: flex; align-items: center; gap: var(--space-12); }
+        .kpi-result-badge { background: rgba(255, 255, 255, 0.2); padding: var(--space-4) var(--space-12); border-radius: var(--radius-lg); font-size: 12px; }
+
+        .kpi-table-wrapper { overflow-x: auto; }
+        .kpi-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .kpi-table thead { background: var(--yellow-light); }
+        .kpi-table th { padding: var(--space-16) var(--space-12); text-align: center; font-weight: var(--weight-bold); color: var(--black); border: 1px solid var(--hyundai-sand); font-size: 13px; }
+        .kpi-table td { padding: var(--space-12); border: 1px solid var(--hyundai-sand); text-align: center; vertical-align: middle; }
+        .kpi-table tbody tr:hover { background: var(--hyundai-light-sand); }
+        .kpi-category-cell { background: var(--hyundai-light-sand); font-weight: var(--weight-medium); color: var(--progressive-blue); text-align: left !important; padding-left: var(--space-16) !important; }
+        .kpi-item-cell { text-align: left !important; padding-left: var(--space-16) !important; font-weight: var(--weight-medium); }
+        .kpi-unit-cell { color: var(--grey-dark); }
+        .kpi-base-cell { color: var(--progressive-blue); font-weight: var(--weight-bold); font-size: 15px; }
+        .kpi-base-cell.pending { color: var(--grey-disabled); font-weight: var(--weight-regular); }
+
+        .target-input { width: 100%; height: 36px; padding: 0 var(--space-12); font-size: 13px; border: 1px solid var(--hyundai-sand); border-radius: var(--radius-sm); text-align: center; font-family: var(--font-text); }
+        .target-input:focus { outline: none; border-color: var(--progressive-blue); }
+
+        .run-button-area { display: flex; justify-content: center; padding: var(--space-24); border-top: 1px solid var(--hyundai-sand); }
+
+        .action-footer { background: var(--white); border-top: 1px solid var(--hyundai-sand); padding: var(--space-20) var(--space-32); display: flex; justify-content: space-between; align-items: center; }
+        .footer-info { font-size: 14px; color: var(--grey-dark); }
+        .footer-actions { display: flex; gap: var(--space-12); }
+
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 44, 95, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .loading-overlay.active { display: flex; }
+        .loading-content { background: var(--white); padding: var(--space-40); border-radius: var(--radius-md); text-align: center; min-width: 300px; }
+        .loading-spinner { width: 48px; height: 48px; border: 4px solid var(--hyundai-sand); border-top-color: var(--hyundai-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto var(--space-20); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-title { font-size: 18px; font-weight: var(--weight-medium); color: var(--hyundai-blue); margin-bottom: var(--space-8); }
+        .loading-desc { font-size: 14px; color: var(--grey-dark); margin-bottom: var(--space-20); }
+        .loading-progress { width: 100%; height: 8px; background: var(--hyundai-sand); border-radius: 4px; overflow: hidden; }
+        .loading-progress-bar { height: 100%; background: var(--progressive-blue); border-radius: 4px; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="global-nav">
+            <div class="logo-area">
+                <div class="logo-title">R&D Parameter DB</div>
+                <div class="logo-subtitle">현대자동차
+                
+                </div>
+            </div>
+                        <div class="nav-menu">
+                <div class="nav-item" onclick="location.href='index.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    데이터조회
+                </div>
+                <div class="nav-item" onclick="location.href='create-step1.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                    </svg>
+                    데이터 생성
+                </div>
+                <div class="nav-item active" onclick="location.href='kpi-analysis.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    해석
+                </div>
+                <div class="nav-item" onclick="location.href='simulation-setup.html'">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                    </svg>
+                    시뮬레이션
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="top-bar-left">
+                   
+                    <h1 class="page-title">해석 & Base값 도출</h1>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn btn-secondary" onclick="saveDraft()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/></svg>
+                        저장
+                    </button>
+                </div>
+            </div>
+
+            
+
+            <div class="content-area">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                            해석 설정
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Performance 유형</label>
+                                <select class="form-select" id="performanceType" onchange="onPerformanceChange()">
+                                    <option value="">선택하세요</option>
+                                    <option value="handling">Handling</option>
+                                    <option value="ride">Ride</option>
+                                    <option value="nvh">NVH</option>
+                                    <option value="rr_suspension">RR Suspension K&C</option>
+                                    <option value="fr_suspension">FR Suspension K&C</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">파라미터 버전</label>
+                                <select class="form-select" id="parameterVersion">
+                                    <option value="">선택하세요</option>
+                                    <option value="v1.0">v1.0 - 초기 설계안</option>
+                                    <option value="v1.1">v1.1 - 축 강성 개선안</option>
+                                    <option value="v2.0">v2.0 - 경량화 적용</option>
+                                    <option value="v2.1">v2.1 - 경량화 + 강성 보완</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-result-card" id="kpiResultCard" style="display: none;">
+                    <div class="kpi-result-header">
+                        <div class="kpi-result-title">
+                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                            <span>KPI 목표값 설정 & 해석</span>
+                        </div>
+                        <div class="kpi-result-badge" id="resultBadge">Performance: -</div>
+                    </div>
+                    
+                    <div class="kpi-table-wrapper">
+                        <table class="kpi-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">KPI List (소분류)</th>
+                                    <th>KPI Item</th>
+                                    <th style="width: 80px;">Unit</th>
+                                    <th style="width: 150px;">Target</th>
+                                    <th style="width: 100px;">Base</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kpiTableBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="run-button-area">
+                        <button class="btn btn-run" onclick="runAnalysis()">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                            해석 실행
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+      
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-title">해석 실행 중...</div>
+            <div class="loading-desc">KPI Base값을 도출하고 있습니다</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const kpiDatabase = {
+            handling: {
+                name: 'Handling',
+                kpiLists: [
+                    { name: 'Response', items: [
+                        { id: 'kpi_201', name: 'Steering Wheel Angle', unit: 'deg', target: '25.2±1.00', base: '28.0' },
+                        { id: 'kpi_202', name: 'Lateral Acceleration Response Time', unit: 'sec', target: '0.25±0.01', base: '0.266' }
+                    ]},
+                    { name: 'General Handling', items: [
+                        { id: 'kpi_203', name: 'Roll Angle Peak', unit: 'deg', target: '1.90±0.08', base: '1.80' },
+                        { id: 'kpi_204', name: 'Roll Angle Steady State', unit: 'deg', target: '1.70±0.08', base: '1.50' },
+                        { id: 'kpi_205', name: 'Yaw Rate Overshoot', unit: '%', target: '25.0±1.50', base: '28.15' }
+                    ]},
+                    { name: 'Limit Handling', items: [
+                        { id: 'kpi_206', name: 'Steady State Sideslip Angle', unit: 'deg', target: '0.60±0.02', base: '0.65' }
+                    ]}
+                ]
+            },
+            ride: {
+                name: 'Ride',
+                kpiLists: [
+                    { name: 'Vibration', items: [
+                        { id: 'kpi_301', name: 'Vertical Acceleration (Front)', unit: 'm/s²', target: '1.0±0.1', base: '1.2' },
+                        { id: 'kpi_302', name: 'Vertical Acceleration (Rear)', unit: 'm/s²', target: '1.2±0.1', base: '1.4' }
+                    ]},
+                    { name: 'Motion', items: [
+                        { id: 'kpi_303', name: 'Pitch Angle', unit: 'deg', target: '1.5±0.2', base: '1.8' },
+                        { id: 'kpi_304', name: 'Suspension Travel', unit: 'mm', target: '80±5', base: '85' }
+                    ]}
+                ]
+            }
+        };
+
+        let analysisCompleted = false;
+
+        function onPerformanceChange() {
+            const performanceType = document.getElementById('performanceType').value;
+            if (!performanceType) {
+                document.getElementById('kpiResultCard').style.display = 'none';
+                document.getElementById('footerInfo').textContent = 'Performance 유형을 선택하면 KPI 목록이 표시됩니다.';
+                return;
+            }
+            const kpiData = kpiDatabase[performanceType];
+            if (!kpiData) { alert('해당 Performance의 KPI 데이터가 없습니다.'); return; }
+
+            renderKPITable(kpiData, false);
+            document.getElementById('kpiResultCard').style.display = 'block';
+            document.getElementById('resultBadge').textContent = 'Performance: ' + kpiData.name;
+            document.getElementById('footerInfo').textContent = 'Target 값을 입력하고 해석을 실행하세요.';
+            document.getElementById('nextStepBtn').disabled = true;
+            analysisCompleted = false;
+            document.getElementById('kpiResultCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderKPITable(kpiData, showBase) {
+            const tbody = document.getElementById('kpiTableBody');
+            let html = '';
+            kpiData.kpiLists.forEach(kpiList => {
+                kpiList.items.forEach((item, index) => {
+                    html += '<tr>';
+                    if (index === 0) html += '<td class="kpi-category-cell" rowspan="' + kpiList.items.length + '">' + kpiList.name + '</td>';
+                    html += '<td class="kpi-item-cell">' + item.name + '</td>';
+                    html += '<td class="kpi-unit-cell">' + item.unit + '</td>';
+                    html += '<td><input type="text" class="target-input" id="target-' + item.id + '" value="' + (item.target || '') + '" placeholder="목표값±허용"></td>';
+                    html += showBase ? '<td class="kpi-base-cell">' + item.base + '</td>' : '<td class="kpi-base-cell pending">-</td>';
+                    html += '</tr>';
+                });
+            });
+            tbody.innerHTML = html;
+        }
+
+        function runAnalysis() {
+            const performanceType = document.getElementById('performanceType').value;
+            const paramVersion = document.getElementById('parameterVersion').value;
+            if (!performanceType) { alert('Performance 유형을 선택해주세요.'); return; }
+            if (!paramVersion) { alert('파라미터 버전을 선택해주세요.'); return; }
+
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('active');
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    progressBar.style.width = '0%';
+                    showBaseValues(performanceType);
+                }, 300);
+            }, 2000);
+        }
+
+        function showBaseValues(performanceType) {
+            const kpiData = kpiDatabase[performanceType];
+            renderKPITable(kpiData, true);
+            document.getElementById('nextStepBtn').disabled = false;
+            document.getElementById('footerInfo').textContent = '해석이 완료되었습니다. 다음 단계로 진행하세요.';
+            analysisCompleted = true;
+        }
+
+        function goToNextStep() {
+            if (!analysisCompleted) { alert('먼저 해석을 실행해주세요.'); return; }
+            const performanceType = document.getElementById('performanceType').value;
+            const paramVersion = document.getElementById('parameterVersion').value;
+            const kpiData = kpiDatabase[performanceType];
+
+            const kpiWithTargets = [];
+            kpiData.kpiLists.forEach(kpiList => {
+                kpiList.items.forEach(item => {
+                    const targetInput = document.getElementById('target-' + item.id);
+                    kpiWithTargets.push({ ...item, kpiList: kpiList.name, target: targetInput ? targetInput.value : item.target });
+                });
+            });
+
+            localStorage.setItem('analysisResult', JSON.stringify({
+                performanceType, performanceName: kpiData.name, parameterVersion: paramVersion,
+                kpiData: kpiData, kpiWithTargets: kpiWithTargets, analysisTime: new Date().toISOString()
+            }));
+            location.href = 'simulation-setup.html';
+        }
+
+        function saveDraft() { alert('저장되었습니다.'); }
+    </script>
+</body>
+</html>
