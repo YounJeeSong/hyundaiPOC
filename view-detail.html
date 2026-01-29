@@ -1470,17 +1470,12 @@
                         <div class="canvas-card-part-number">${set.subtitle}</div>
                     </div>
                     <div class="canvas-card-body">
-                        ${set.params.slice(0, 4).map(p => `
+                        ${set.params.map(p => `
                             <div class="canvas-param-row">
                                 <span class="canvas-param-name">${p.name}</span>
                                 <span class="canvas-param-value">${p.value}</span>
                             </div>
                         `).join('')}
-                        ${set.params.length > 4 ? `
-                            <div style="font-size:11px;color:var(--grey-66);text-align:center;padding-top:4px;">
-                                +${set.params.length - 4}개 더...
-                            </div>
-                        ` : ''}
                     </div>
                 `;
 
@@ -1609,17 +1604,12 @@
                         <div class="set-card-subtitle">${set.subtitle}</div>
                     </div>
                     <div class="set-card-body">
-                        ${set.params.slice(0, 5).map(p => `
+                        ${set.params.map(p => `
                             <div class="set-param-item">
                                 <span class="set-param-name">${p.name}</span>
                                 <span class="set-param-value">${p.value} ${p.unit}</span>
                             </div>
                         `).join('')}
-                        ${set.params.length > 5 ? `
-                            <div style="text-align:center;padding-top:8px;font-size:12px;color:var(--grey-66);">
-                                +${set.params.length - 5}개 더보기
-                            </div>
-                        ` : ''}
                         ${set.params.length === 0 ? `
                             <div style="text-align:center;padding:20px;color:var(--grey-66);font-size:13px;">
                                 파라미터 없음
