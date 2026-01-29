@@ -194,9 +194,12 @@
         });
 
         function initSampleData() {
+            const DATA_VERSION = 'v2';
             let projectList = JSON.parse(localStorage.getItem('projectList') || '[]');
             
-            if (projectList.length === 0) {
+            if (localStorage.getItem('dataVersion') !== DATA_VERSION || projectList.length === 0) {
+                localStorage.clear();
+                localStorage.setItem('dataVersion', DATA_VERSION);
                 projectList = dummyProjects.map(p => ({
                     id: p.id,
                     name: p.name,
