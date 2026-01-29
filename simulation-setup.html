@@ -1906,11 +1906,8 @@
             const performanceType = document.getElementById('performanceType').value;
             const runBtn = document.getElementById('runBtn');
             
-            if (performanceType && selectedCount > 0 && validCaseCount > 0) {
-                runBtn.disabled = false;
-            } else {
-                runBtn.disabled = true;
-            }
+            // 프로토타입: 항상 활성화
+            runBtn.disabled = false;
         }
 
         // 시뮬레이션 실행
