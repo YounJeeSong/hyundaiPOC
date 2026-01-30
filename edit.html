@@ -842,6 +842,7 @@
         let draggedCard = null;
         let draggedAnchor = null;
         let dragOffset = { x: 0, y: 0 };
+        let canvasCardCounter = 1;
 
         const GRID_SIZE = 20;
 
@@ -1011,7 +1012,7 @@
         // ============================================
         function addCardToCanvas(card, x, y, animate = true) {
             const canvasCard = {
-                id: Date.now(),
+                id: canvasCardCounter++,
                 cardId: card.id,
                 x: snapToGrid(x),
                 y: snapToGrid(y)
